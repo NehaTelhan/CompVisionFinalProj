@@ -1,5 +1,5 @@
 # CompVisionFinalProj
-###Final Project for the Computer Vision S17 CS 4501
+### Final Project for the Computer Vision S17 CS 4501
 
 ## Topic: Assisted Vision
 
