@@ -3,6 +3,8 @@ from keras.models import Sequential
 from keras.optimizers import RMSprop
 import keras
 
+# Training data: 680673
+
 # Training and validation images should be output consolidated from window_divider
 def train_network(training_images, training_classifications, validation_images, validation_classifications):
     # TODO: Decide on how many images per batch, how many epochs, and number of samples
