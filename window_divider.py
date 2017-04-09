@@ -33,5 +33,14 @@ def divide_picture_to_windows(picture):
 
     return windows
 
+def convertWindowToArray(window):
+    array = numpy.zeros(200)
+    count = 0
+    for y in range(10):
+        for x in range(20):
+            array[count] = window[y, x]
+            count = count + 1
+    return array
+
 if __name__ == "__main__":
     pass
