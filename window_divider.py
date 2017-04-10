@@ -1,4 +1,5 @@
 import numpy
+import scipy.misc
 
 # Expected input: Skimage.img_as_float in grayscale from gaussian pyramid
 def divide_picture_to_windows(picture):
@@ -23,11 +24,23 @@ def divide_picture_to_windows(picture):
                     window[j, i] = picture[y, x]
             list_of_windows.append(window)
 
+            # Save picture
+            scipy.misc.imsave("windows/window" + str(count), thinned_image)
+
     windows = numpy.zeros((count, height, width))
     for i in range(count):
         windows[i] = list_of_windows[i]
 
     return windows
+
+def convertWindowToArray(window):
+    array = numpy.zeros(200)
+    count = 0
+    for y in range(10):
+        for x in range(20):
+            array[count] = window[y, x]
+            count = count + 1
+    return array
 
 if __name__ == "__main__":
     pass
