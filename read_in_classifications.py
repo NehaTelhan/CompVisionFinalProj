@@ -17,6 +17,18 @@ def read_in_classifications_for_training(filename):
     json.dump(classifications, f)
     f.close()
 
+def retrieve_classifications(filename, imgname):
+    f = open(filename, 'r')
+    classification_list = f.read().replace("[", "")
+    classification_list = classification_list.replace("]", "")
+    classification_list = classification_list.split(",")
+    imgname = imgname.split("_")
+    imgnum = imgname[1].split(".")
+    classification = classification_list[int(imgnum[0])]
+    classification = classification.replace("\"", "")
+    return int(classification)
+
 if __name__ == "__main__":
     #read_in_classifications_for_training('train_unbalance.txt')
-    read_in_classifications_for_training('val_unbalance.txt')
+    #read_in_classifications_for_training('val_unbalance.txt')
+    print(retrieve_classifications("classifications_train_unbalance.txt", "text_0.jpg"))
