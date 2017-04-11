@@ -31,3 +31,18 @@
 #### Gaussian Pyramid
 #### 20 x 10 pixel region (on both training and test data)
 #### Region into network
+---------------------------------------------------------------------------------------------------------------
+
+### Week 2!
+
+#### Edge Detection (John - Done)
+#### Gaussian Pyramid (Neha - in progress)
+#### 20x 10 (Allison - Done)
+#### Neural Networks - written not trained
+#### Saliency Map (John)
+#### Vertical Segementation (Sadiyah)
+#### Horizontal Segmentation (Sadiyah)
+#### Color Histogram (Neha)
+#### Rescale to height 100 pixels (text box bitmap) (Neha)
+#### Remove Backgroud (Allison)
+#### Binarize (Allison)
