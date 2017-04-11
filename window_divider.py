@@ -6,8 +6,8 @@ def divide_picture_to_windows(picture):
     height = picture.shape[0]
     width = picture.shape[1]
 
-    x_step = 3
-    y_step = 2
+    x_step = 10
+    y_step = 5
 
     height_of_window = 10
     width_of_window = 20
@@ -25,9 +25,9 @@ def divide_picture_to_windows(picture):
             list_of_windows.append(window)
 
             # Save picture
-            scipy.misc.imsave("windows/window" + str(count), thinned_image)
+            # scipy.misc.imsave("windows/window" + str(count), thinned_image)
 
-    windows = numpy.zeros((count, height, width))
+    windows = numpy.zeros((count, height_of_window, width_of_window))
     for i in range(count):
         windows[i] = list_of_windows[i]
 

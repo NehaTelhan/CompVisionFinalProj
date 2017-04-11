@@ -2,14 +2,65 @@ from keras.layers import Dense
 from keras.models import Sequential
 from keras.optimizers import RMSprop
 import keras
+import skimage.io
+import numpy
+import window_divider
+import read_in_classifications
+import random
 
-# Training data: 680673
+
+def read_image_list():
+    with open("demo-finished.txt", "r") as images_list:
+        images = []
+        classifications = []
+        for i in images_list:
+            input_image = skimage.img_as_float(skimage.io.imread("../edges/" + i.replace("\n", ""), True))
+            windows_for_image = window_divider.divide_picture_to_windows(input_image)
+            for j in windows_for_image:
+                images.append(window_divider.convertWindowToArray(j))
+            classifications.append(read_in_classifications.retrieve_classifications("classifications_train_unbalance.txt", i))
+            print(i)
+        return [numpy.array(images), numpy.array(classifications)]
+
+
+def get_classifications_count(classifications):
+    no_text = 0
+    text = 0
+    for c in classifications:
+        print(c)
+        if c == 0:
+            no_text += 1
+        elif c == 1:
+            text += 1
+        else:
+            raise ValueError
+    return no_text, text
+
+
+def seperate_data(images, classifications):
+    training = []
+    validation = []
+
+    training_classifications = []
+    validation_classifications = []
+
+    for i in range(len(images)):
+        rand = random.random()
+
+        if rand < 0.67:
+            training.append(i)
+            training_classifications.append(classifications[i])
+        else:
+            validation.append(i)
+            validation_classifications.append(classifications[i])
+    return numpy.array(training), numpy.array(validation), numpy.array(training_classifications), numpy.array(validation_classifications)
+
 
 # Training and validation images should be output consolidated from window_divider
 def train_network(training_images, training_classifications, validation_images, validation_classifications):
     # TODO: Decide on how many images per batch, how many epochs, and number of samples
-    batch_size = 16
-    epochs = 2
+    batch_size = 50000
+    epochs = 3
 
     num_classes = 2
 
@@ -45,4 +96,9 @@ def train_network(training_images, training_classifications, validation_images, 
     return model
 
 if __name__ == "__main__":
+    images, classifications = read_image_list()
+
+    training_images, validation_images, training_classifications, validation_classifications = seperate_data(images, classifications)
+    train_network(training_images, training_classifications, validation_images, validation_classifications)
+
     pass
