@@ -26,9 +26,24 @@ def retrieve_classifications(filename, imgname):
     imgnum = imgname[1].split(".")
     classification = classification_list[int(imgnum[0])]
     classification = classification.replace("\"", "")
-    return int(classification)
+    num = int(classification)
+    if num == 0:
+        num = 1
+    else:
+        num = -1
+    return num
+
+def convert_zero_classifications_to_one(classifications):
+    fixed_classifications = numpy.zeros(len(classifications))
+    for i in classifications:
+        if i == 0:
+            fixed_classifications[i] = 1
+        else:
+            fixed_classifications[i] = -1
+    return fixed_classifications
 
 if __name__ == "__main__":
     #read_in_classifications_for_training('train_unbalance.txt')
     #read_in_classifications_for_training('val_unbalance.txt')
-    print(retrieve_classifications("classifications_train_unbalance.txt", "text_0.jpg"))
+    # print(retrieve_classifications("classifications_train_unbalance.txt", "text_0.jpg"))
+    pass

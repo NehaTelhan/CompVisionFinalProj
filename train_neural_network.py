@@ -1,5 +1,5 @@
 from keras.layers import Dense
-from keras.models import Sequential
+from keras.models import Sequential, model_from_json
 from keras.optimizers import RMSprop
 import keras
 import skimage.io
@@ -59,8 +59,8 @@ def seperate_data(images, classifications):
 # Training and validation images should be output consolidated from window_divider
 def train_network(training_images, training_classifications, validation_images, validation_classifications):
     # TODO: Decide on how many images per batch, how many epochs, and number of samples
-    batch_size = 50000
-    epochs = 3
+    batch_size = 100000
+    epochs = 1
 
     num_classes = 2
 
@@ -95,10 +95,29 @@ def train_network(training_images, training_classifications, validation_images, 
 
     return model
 
-if __name__ == "__main__":
-    images, classifications = read_image_list()
+def neural_network_predict(window):
+    window_input = numpy.zeros((1, 200))
+    window_input[0] = window
 
-    training_images, validation_images, training_classifications, validation_classifications = seperate_data(images, classifications)
+    json_file = open('model.json', 'r')
+    model_json = json_file.read()
+    json_file.close()
+    model = model_from_json(model_json)
+    model.load_weights("model.h5")
+
+    model.compile(loss='mean_squared_error',
+                  optimizer=RMSprop(),
+                  metrics=['accuracy'])
+
+    return model.predict(window_input)[0]
+
+def read_in_data(training_images_filename, training_classifications_filename, validation_images_filename, validation_classifications_filename):
+    return numpy.loadtxt(training_images_filename, training_classifications_filename, validation_images_filename, validation_classifications_filename)
+
+if __name__ == "__main__":
+    #images, classifications = read_image_list()
+
+    training_images, training_classifications, validation_images, validation_classifications = read_in_data("training_images.txt", "training_classifications.txt", "validation_images.txt", "validation_classifications.txt")
     train_network(training_images, training_classifications, validation_images, validation_classifications)
 
     pass
