@@ -70,8 +70,8 @@ def train_network(training_images, training_classifications, validation_images, 
     num_classes = 2
 
     # Convert class vectors to binary class matrices
-    train_classifications = keras.utils.to_categorical(training_classifications, num_classes)
-    validation_classifications = keras.utils.to_categorical(validation_classifications, num_classes)
+    #train_classifications = keras.utils.to_categorical(training_classifications, num_classes)
+    #validation_classifications = keras.utils.to_categorical(validation_classifications, num_classes)
 
     # Create model
     model = Sequential()
@@ -82,7 +82,7 @@ def train_network(training_images, training_classifications, validation_images, 
                   optimizer=RMSprop(),
                   metrics=['accuracy'])
 
-    model.fit(training_images, train_classifications,
+    model.fit(training_images, training_classifications,
               batch_size=batch_size,
               epochs=epochs,
               verbose=0,
