@@ -112,12 +112,12 @@ def neural_network_predict(window):
     return model.predict(window_input)[0]
 
 def read_in_data(training_images_filename, training_classifications_filename, validation_images_filename, validation_classifications_filename):
-    return numpy.loadtxt(training_images_filename), numpy.loadtxt(training_classifications_filename), numpy.loadtxt(validation_images_filename), numpy.loadtxt(validation_classifications_filename)
+    return numpy.load(training_images_filename), numpy.load(training_classifications_filename), numpy.load(validation_images_filename), numpy.load(validation_classifications_filename)
 
 if __name__ == "__main__":
     #images, classifications = read_image_list()
 
-    training_images, training_classifications, validation_images, validation_classifications = read_in_data("training_images.txt", "training_classifications.txt", "validation_images.txt", "validation_classifications.txt")
+    training_images, training_classifications, validation_images, validation_classifications = read_in_data("training_images.npy", "training_classifications.npy", "validation_images.npy", "validation_classifications.npy")
     train_network(training_images, training_classifications, validation_images, validation_classifications)
 
     pass
