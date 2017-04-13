@@ -14,12 +14,17 @@ def read_image_list():
         images = []
         classifications = []
         for i in images_list:
-            input_image = skimage.img_as_float(skimage.io.imread("../edges/" + i.replace("\n", ""), True))
+            input_image = skimage.img_as_float(skimage.io.imread("flower.jpg", True))
             windows_for_image = window_divider.divide_picture_to_windows(input_image)
             for j in windows_for_image:
                 images.append(window_divider.convertWindowToArray(j))
+                print(len(window_divider.convertWindowToArray(j)))
             classifications.append(read_in_classifications.retrieve_classifications("classifications_train_unbalance.txt", i))
             print(i)
+            break
+        print(len(numpy.array(images)[0]))
+        numpy.save("test.npy", numpy.array(images))
+        print(len(numpy.load("test.npy")[0]))
         return [numpy.array(images), numpy.array(classifications)]
 
 
