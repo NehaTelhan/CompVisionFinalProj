@@ -2,7 +2,16 @@
 import numpy
 
 
-def set_up(text_box, image):
+def initial_box(saliency_map):
+    """ a special kind of region-growing algorithm  
+    is employed, where each rectangular region is only allowed
+    to grow by one complete row or column of the rectangle 
+    and the seed position is required to meet a minimal amount
+    of text saliency """
+
+
+
+def set_up(text_box, saliency_map):
     # text_box = [starting_pixel, width, height]
     starting_pixel = text_box[0] # should be a tuple, (x, y)
     width = text_box[1] # num columns
@@ -15,7 +24,7 @@ def set_up(text_box, image):
     # building the full text_box to do the projection on
     for x in range(0, width):
         for y in range(0, height):
-            full_box[x][y] = image[starting_pixel[0]+x][starting_pixel[1]+y]
+            full_box[x][y] = saliency_map[starting_pixel[0] + x][starting_pixel[1] + y]
 
     # vertical projection = sum of pixel intensities over every row
     vert_proj = [sum(full_box[i]) for i in range(height)]
@@ -33,16 +42,67 @@ def set_up(text_box, image):
     vert_seg_thresh = (min_vert, max_vert)
     horiz_seg_thresh = (min_horiz, max_horiz)
     new_box = [starting_pixel, width, height]
-    vertical(vert_seg_thresh, vert_proj, new_box)
-    horizontal(horiz_seg_thresh, horizontal_proj, new_box)
+    vert_box_list = vertical(vert_seg_thresh, vert_proj, new_box, height)
+    horiz_box_list = horizontal(horiz_seg_thresh, horizontal_proj, new_box, width)
+
+    return [vert_box_list, horiz_box_list]
 
 
-def vertical(vert_threshold, vert_proj, box):
+def vertical(vert_threshold, vert_proj, box, height):
     """ loop through all rows of profile to set boundaries """
+    change = False
+    upper_bound = None
+    lower_bound = None
+    box_list = []
+    for i in range(0, height):
+        if vert_proj[i] > vert_threshold[0]:
+            if upper_bound is None:
+                upper_bound = i
+        else:
+            if lower_bound is None:
+                lower_bound = i
+            if upper_bound is not None:
+                new_box = [box[0], upper_bound, lower_bound]
+                box_list.append(new_box)
+                upper_bound = None
+                lower_bound = None
+                change = True
+    return box_list
 
 
-def horizontal(horiz_threshold, horizontal_proj, box):
+def horizontal(horiz_threshold, horizontal_proj, box, width):
     """ loop through all columns of profile to set boundaries """
+    left_bound = None
+    right_bound = None
+    box_list = []
+    for i in range(0, width):
+        if horizontal_proj[i] > horiz_threshold[0]:
+            if left_bound is None:
+                left_bound = i
+            elif right_bound is not None:
+                if abs(i-right_bound) > horiz_threshold[0]: # wth is large enough?
+                    new_box = [box[0], left_bound, right_bound]
+                    box_list.append(new_box)
+                    left_bound = None
+                    right_bound = None
+                else:
+                    right_bound = None
+
+        elif right_bound is None:
+            right_bound = i
+    if left_bound is not None and right_bound is None:
+        right_bound = width
+    if left_bound is not None and right_bound is not None:
+        new_box = [box[0], left_bound, right_bound]
+        box_list.append(new_box)
+
+    return box_list
+
+
+
 
 if __name__ == "__main__":
+    text_box = [(0,0), 0, 0]
+    image = [0,0,0,0,0,0,0,0,0,0] # saliency map
+    # only need to call set up for both vertical and horizontal segmentation
     # set_up(text_box, image)
