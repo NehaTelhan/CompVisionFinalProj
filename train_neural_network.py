@@ -1,5 +1,5 @@
 from keras.layers import Dense
-from keras.models import Sequential, model_from_json
+from keras.models import Sequential, model_from_json, load_model
 from keras.optimizers import RMSprop
 import keras
 import skimage.io
@@ -64,7 +64,7 @@ def seperate_data(images, classifications):
 # Training and validation images should be output consolidated from window_divider
 def train_network(training_images, training_classifications, validation_images, validation_classifications):
     # TODO: Decide on how many images per batch, how many epochs, and number of samples
-    batch_size = 100000
+    batch_size = 50
     epochs = 1
 
     num_classes = 2
@@ -74,9 +74,11 @@ def train_network(training_images, training_classifications, validation_images, 
     #validation_classifications = keras.utils.to_categorical(validation_classifications, num_classes)
 
     # Create model
-    model = Sequential()
-    model.add(Dense(2, activation='tanh', input_shape=(200,)))
-    model.add(Dense(1, activation='tanh'))
+    # Replace with newly loaded model
+    # model = Sequential()
+    model = load_model('model.h5')
+    #model.add(Dense(2, activation='tanh', input_shape=(200,)))
+    #model.add(Dense(1, activation='tanh'))
 
     model.compile(loss='mean_squared_error',
                   optimizer=RMSprop(),
@@ -93,22 +95,25 @@ def train_network(training_images, training_classifications, validation_images, 
     print('Test accuracy:', score[1])
 
     # Save model
-    model_json = model.to_json()
-    with open("model.json", "w") as json_file:
-        json_file.write(model_json)
-    model.save_weights("model.h5")
+    # model_json = model.to_json()
+    # with open("model.json", "w") as json_file:
+    #     json_file.write(model_json)
+    # model.save_weights("model-v2.h5")
+    model.save("model.h5")
 
     return model
+
 
 def neural_network_predict(window):
     window_input = numpy.zeros((1, 200))
     window_input[0] = window
 
-    json_file = open('model.json', 'r')
-    model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(model_json)
-    model.load_weights("model.h5")
+    # json_file = open('model.json', 'r')
+    # model_json = json_file.read()
+    # json_file.close()
+    # model = model_from_json(model_json)
+    # model.save("model.h5")
+    model = load_model("model.h5")
 
     model.compile(loss='mean_squared_error',
                   optimizer=RMSprop(),
@@ -116,13 +121,14 @@ def neural_network_predict(window):
 
     return model.predict(window_input)[0]
 
+
 def read_in_data(training_images_filename, training_classifications_filename, validation_images_filename, validation_classifications_filename):
     return numpy.load(training_images_filename), numpy.load(training_classifications_filename), numpy.load(validation_images_filename), numpy.load(validation_classifications_filename)
 
 if __name__ == "__main__":
     #images, classifications = read_image_list()
 
-    training_images, training_classifications, validation_images, validation_classifications = read_in_data("training_images.npy", "training_classifications.npy", "validation_images.npy", "validation_classifications.npy")
+    training_images, training_classifications, validation_images, validation_classifications = read_in_data("training_data/training_images.npy", "training_data/training_classifications.npy", "training_data/validation_images.npy", "training_data/validation_classifications.npy")
     train_network(training_images, training_classifications, validation_images, validation_classifications)
 
     pass
