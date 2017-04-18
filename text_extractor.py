@@ -26,6 +26,7 @@ import skimage.io, skimage.transform, pylab
 import scipy.ndimage.filters, scipy.signal, scipy.misc
 
 from window_divider import divide_picture_to_windows, convertWindowToArray
+from train_neural_network import neural_network_predict
 
 
 def canny_edge(img_file):
@@ -184,10 +185,22 @@ def canny_edge(img_file):
 
 
 def get_gaussian_pyramid(input_image):
+
+    height_of_window = 10
+    width_of_window = 20
+    images = []
+
     rows = input_image.shape[0]
     cols = input_image.shape[1]
-    image_arr = skimage.transform.resize(input_image, (int((2 / 3) * rows), int((2 / 3) * cols)))
-    return image_arr
+
+    while int((2 / 3) * rows) > height_of_window and int((2 / 3) * cols) > width_of_window:
+
+        resized_image = skimage.transform.resize(input_image, (int((2 / 3) * rows), int((2 / 3) * cols)))
+        images.append(resized_image)
+        rows = int((2 / 3) * rows)
+        cols = int((2 / 3) * cols)
+
+    return images
 
 
 def get_windows(image):
@@ -197,11 +210,21 @@ def get_windows(image):
         images.append(convertWindowToArray(j))
     return images
 
+
 if __name__ == "__main__":
     image_file = sys.argv[1]
     edge_orientation_image = canny_edge(image_file)
-    resized_image = get_gaussian_pyramid(edge_orientation_image)
-    windows = get_windows(resized_image)
-    pylab.imshow(windows[0][0], cmap="gray")
-    pylab.show()
+    image_list = get_gaussian_pyramid(edge_orientation_image)
+
+    for image in image_list:
+        windows = get_windows(image)
+        for window in windows:
+            result = neural_network_predict(window)
+            print(result)
+
+
+
+    # windows = get_windows(resized_image)
+    # pylab.imshow(windows[1], cmap="gray")
+    # pylab.show()
 

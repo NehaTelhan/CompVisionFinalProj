@@ -6,8 +6,8 @@ def divide_picture_to_windows(picture):
     height = picture.shape[0]
     width = picture.shape[1]
 
-    x_step = 10
-    y_step = 5
+    x_step = 3
+    y_step = 2
 
     height_of_window = 10
     width_of_window = 20
