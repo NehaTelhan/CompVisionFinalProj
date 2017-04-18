@@ -1,4 +1,5 @@
 import json
+import numpy
 
 def read_in_classifications_for_training(filename):
     with open(filename) as file:
@@ -24,13 +25,17 @@ def retrieve_classifications(filename, imgname):
     classification_list = classification_list.split(",")
     imgname = imgname.split("_")
     imgnum = imgname[1].split(".")
-    classification = classification_list[int(imgnum[0])]
+    if filename == "val_unbalance.txt":
+        imgnum = int(imgnum[0]) - 680674
+        classification = classification_list[imgnum]
+    else:
+        classification = classification_list[int(imgnum[0])]
     classification = classification.replace("\"", "")
     num = int(classification)
     if num == 0:
-        num = 1
-    else:
         num = -1
+    else:
+        num = 1
     return num
 
 def convert_zero_classifications_to_one(classifications):
