@@ -213,14 +213,24 @@ def get_windows(image):
 
 if __name__ == "__main__":
     image_file = sys.argv[1]
-    edge_orientation_image = canny_edge(image_file)
-    image_list = get_gaussian_pyramid(edge_orientation_image)
+    A = skimage.io.imread(image_file, True)
 
-    for image in image_list:
-        windows = get_windows(image)
-        for window in windows:
-            result = neural_network_predict(window)
-            print(result)
+    # Convert image to float
+    A = skimage.img_as_float(A)
+
+    A = skimage.transform.resize(A, (48, 48, 3))
+
+    pylab.imshow(A)
+    pylab.show()
+
+    # edge_orientation_image = canny_edge(image_file)
+    # image_list = get_gaussian_pyramid(edge_orientation_image)
+    #
+    # for image in image_list:
+    #     windows = get_windows(image)
+    #     for window in windows:
+    #         result = neural_network_predict(window)
+    #         print(result)
 
 
 
