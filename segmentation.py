@@ -10,6 +10,7 @@ def initial_box(saliency_map):
     of text saliency """
 
 
+
 def set_up(text_box, saliency_map):
     # text_box = [starting_pixel, width, height]
     starting_pixel = text_box[0] # should be a tuple, (x, y)
@@ -41,7 +42,7 @@ def set_up(text_box, saliency_map):
     vert_seg_thresh = (min_vert, max_vert)
     horiz_seg_thresh = (min_horiz, max_horiz)
     new_box = [starting_pixel, width, height]
-    vert_box_list = vertical(vert_seg_thresh, vert_proj, new_box, height
+    vert_box_list = vertical(vert_seg_thresh, vert_proj, new_box, height)
     horiz_box_list = horizontal(horiz_seg_thresh, horizontal_proj, new_box, width)
 
     return [vert_box_list, horiz_box_list]
@@ -101,7 +102,7 @@ def horizontal(horiz_threshold, horizontal_proj, box, width):
 
 
 if __name__ == "__main__":
-    text_box = None
-    image = None # saliency map
+    text_box = [(0,0), 0, 0]
+    image = [0,0,0,0,0,0,0,0,0,0] # saliency map
     # only need to call set up for both vertical and horizontal segmentation
     # set_up(text_box, image)
