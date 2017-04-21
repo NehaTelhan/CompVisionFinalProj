@@ -1,10 +1,11 @@
+import math
 import numpy
-import skimage.color
+import pylab
+import skimage.color, skimage.io
 
 # Input original image in color as float array
 def remove_background(original_image, box_start_row, box_start_col, box_width, box_height, is_text_inverse):
-    # TODO: Determine this value
-    threshold_seedfill = 50
+    threshold_seedfill = 1.4
 
     height = original_image.shape[0]
     width = original_image.shape[1]
@@ -45,7 +46,7 @@ def remove_background(original_image, box_start_row, box_start_col, box_width, b
         boundary_color = original_image[i + box_start_row, box_start_col]
         box[i, 0] = 1
         while len(pixels_to_check) > 0:
-            pixel = pixels_to_check.pop(obj=pixels_to_check[0])
+            pixel = pixels_to_check.pop(0)
             if calc_rgb_distance(original_image[pixel[0] + box_start_row, pixel[1] + box_start_col], boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
                 # left
@@ -70,7 +71,7 @@ def remove_background(original_image, box_start_row, box_start_col, box_width, b
         boundary_color = original_image[box_start_row, box_start_col + j]
         box[0, j] = 1
         while len(pixels_to_check) > 0:
-            pixel = pixels_to_check.pop(obj=pixels_to_check[0])
+            pixel = pixels_to_check.pop(0)
             if calc_rgb_distance(original_image[pixel[0] + box_start_row, pixel[1] + box_start_col],
                                  boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
@@ -96,7 +97,7 @@ def remove_background(original_image, box_start_row, box_start_col, box_width, b
         boundary_color = original_image[i + box_start_row, box_start_col + box_width - 1]
         box[i, box_width - 1] = 1
         while len(pixels_to_check) > 0:
-            pixel = pixels_to_check.pop(obj=pixels_to_check[0])
+            pixel = pixels_to_check.pop(0)
             if calc_rgb_distance(original_image[pixel[0] + box_start_row, pixel[1] + box_start_col],
                                  boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
@@ -122,7 +123,7 @@ def remove_background(original_image, box_start_row, box_start_col, box_width, b
         boundary_color = original_image[box_start_row + box_height - 1, box_start_col + j]
         box[box_height - 1, j] = 1
         while len(pixels_to_check) > 0:
-            pixel = pixels_to_check.pop(obj=pixels_to_check[0])
+            pixel = pixels_to_check.pop(0)
             if calc_rgb_distance(original_image[pixel[0] + box_start_row, pixel[1] + box_start_col],
                                  boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
@@ -153,7 +154,7 @@ def binarize_bitmap(original_image, box_start_row, box_start_col, box_width, box
     grayscale = skimage.color.rgb2gray(original_image)
     text_box_bitmap = numpy.zeros((box_height, box_width))
 
-    binarization_threshold = 0.5
+    binarization_threshold = 0.8
     for y in range(box_height):
         for x in range(box_width):
             if is_text_inverse:
@@ -171,4 +172,7 @@ def binarize_bitmap(original_image, box_start_row, box_start_col, box_width, box
     return text_box_bitmap
 
 if __name__ == "__main__":
+    box = remove_background(skimage.img_as_float(skimage.io.imread("example.jpg")), 0, 0, 100, 50, False)
+    pylab.imshow(skimage.color.gray2rgb(box))
+    pylab.show()
     pass
