@@ -9,8 +9,8 @@ def divide_picture_to_windows(picture):
     x_step = 3
     y_step = 2
 
-    height_of_window = 10
-    width_of_window = 20
+    height_of_window = 48
+    width_of_window = 48
 
     list_of_windows = []
     count = 0

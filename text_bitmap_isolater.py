@@ -172,7 +172,7 @@ def binarize_bitmap(original_image, box_start_row, box_start_col, box_width, box
     return text_box_bitmap
 
 if __name__ == "__main__":
-    box = remove_background(skimage.img_as_float(skimage.io.imread("example.jpg")), 0, 0, 100, 50, False)
+    box = remove_background(skimage.img_as_float(skimage.io.imread("example1.jpg")), 0, 0, 100, 50, True)
     pylab.imshow(skimage.color.gray2rgb(box))
     pylab.show()
     pass
