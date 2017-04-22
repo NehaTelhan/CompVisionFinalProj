@@ -1,8 +1,8 @@
-from keras.layers import Dense, Flatten, Input
+from keras.layers import Dense, Flatten, Input, BatchNormalization
 from keras.models import Sequential, model_from_json, load_model, Model
 from keras.layers import Conv2D, MaxPooling2D, Dropout
 from keras.optimizers import RMSprop
-from keras.initializers import VarianceScaling, Ones
+from keras.initializers import Constant
 from keras import optimizers
 from keras.applications import VGG16
 import skimage.io, skimage.transform
@@ -92,39 +92,71 @@ def train_network(training_images, training_classifications, validation_images, 
     # for layer in model.layers[:19]:  # You need to figure out how many layers were in the base model to freeze
     #     layer.trainable = False
 
-    # model = Sequential()
-    # model.add(Conv2D(96, kernel_size=(7, 7), activation='relu', input_shape=(48, 48, 3), kernel_initializer=VarianceScaling(), use_bias=True))
-    # model.add(MaxPooling2D(pool_size=(3, 3)))
-    # model.add(Conv2D(256, kernel_size=(5, 5), activation='relu', kernel_initializer=VarianceScaling(), use_bias=True))
-    # model.add(MaxPooling2D(pool_size=(3, 3)))
-    # model.add(Conv2D(384, kernel_size=(3, 3), activation='relu', kernel_initializer=VarianceScaling(), use_bias=True))
-    # model.add(MaxPooling2D(pool_size=(3, 3)))
-    # # model.add(Conv2D(384, kernel_size=(3, 3), activation='relu', kernel_initializer=VarianceScaling(), use_bias=True))
-    # model.add(Conv2D(256, kernel_size=(3, 3), activation='relu', kernel_initializer=VarianceScaling(), use_bias=True))
-    # model.add(MaxPooling2D(pool_size=(3, 3)))
-    # model.add(Flatten())
-    # model.add(Dense(4096, activation='relu', kernel_initializer=VarianceScaling(), use_bias=True))
-    # model.add(Dropout(0.5))
-    # model.add(Dense(4096, activation='relu', kernel_initializer=VarianceScaling(), use_bias=True))
-    # model.add(Dropout(0.5))
-    # model.add(Dense(2, activation='relu', kernel_initializer=VarianceScaling(), use_bias=True))
-    # model.add(Dense(2, activation="softmax"))
-
     model = Sequential()
-    model.add(Conv2D(32, kernel_size=(3, 3),
+    model.add(Conv2D(96, kernel_size=(7, 7),
                      activation='relu',
-                     input_shape=(48,48,3)))
-    model.add(Conv2D(64, (3, 3), activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
+                     input_shape=(48, 48, 3),
+                     kernel_initializer='glorot_normal',
+                     use_bias=True,
+                     bias_initializer='zeros', data_format='channels_last', padding='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=1, data_format='channels_last'))
+    model.add(
+        BatchNormalization(scale=True, gamma_initializer=Constant(value=0.0001), beta_initializer=Constant(value=0.75)))
+    model.add(Conv2D(256, kernel_size=(5, 5),
+                     activation='relu',
+                     kernel_initializer='glorot_normal',
+                     use_bias=True,
+                     bias_initializer='ones', data_format='channels_last', padding='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=2, data_format='channels_last'))
+    model.add(
+        BatchNormalization(scale=True, gamma_initializer=Constant(value=0.0001), beta_initializer=Constant(value=0.75)))
+    model.add(Conv2D(384, kernel_size=(3, 3),
+                     activation='relu',
+                     kernel_initializer='glorot_normal',
+                     use_bias=True,
+                     bias_initializer='zeros', data_format='channels_last', padding='same'))
+    model.add(Conv2D(384, kernel_size=(3, 3),
+                     activation='relu',
+                     kernel_initializer='glorot_normal',
+                     use_bias=True,
+                     bias_initializer='ones', data_format='channels_last', padding='same'))
+    model.add(Conv2D(256, kernel_size=(3, 3),
+                     activation='relu',
+                     kernel_initializer='glorot_normal',
+                     use_bias=True,
+                     bias_initializer='ones', data_format='channels_last', padding='same'))
+    model.add(MaxPooling2D(pool_size=(3, 3), strides=2, data_format='channels_last'))
     model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
+    model.add(Dense(4096, activation='relu',
+                    kernel_initializer='glorot_normal',
+                    use_bias=True,
+                    bias_initializer='ones'))
     model.add(Dropout(0.5))
-    model.add(Dense(1, activation='tanh'))
+    model.add(Dense(4096, activation='relu',
+                    kernel_initializer='glorot_normal',
+                    use_bias=True,
+                    bias_initializer='ones'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1, activation='tanh',
+                    kernel_initializer='glorot_normal',
+                    use_bias=True,
+                    bias_initializer='zeros'))
+
+    # model = Sequential()
+    # model.add(Conv2D(32, kernel_size=(3, 3),
+    #                  activation='relu',
+    #                  input_shape=(48,48,3)))
+    # model.add(Conv2D(64, (3, 3), activation='relu'))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(Dropout(0.25))
+    # model.add(Flatten())
+    # model.add(Dense(128, activation='relu'))
+    # model.add(Dropout(0.5))
+    # model.add(Dense(1, activation='tanh'))
 
     # Compile the model with a SGD/momentum optimizer and a slow learning rate.
     model.compile(loss='mean_squared_error',
-                  optimizer=optimizers.SGD(lr=1e-3, momentum=0.9),
+                  optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
                   metrics=['accuracy'])
 
     model.fit(training_images, training_classifications,
