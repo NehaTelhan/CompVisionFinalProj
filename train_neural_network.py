@@ -77,8 +77,8 @@ def train_network(training_images, training_classifications, validation_images, 
     num_classes = 2
 
     # Convert class vectors to binary class matrices
-    #train_classifications = keras.utils.to_categorical(training_classifications, num_classes)
-    #validation_classifications = keras.utils.to_categorical(validation_classifications, num_classes)
+    train_classifications = keras.utils.to_categorical(training_classifications, num_classes)
+    validation_classifications = keras.utils.to_categorical(validation_classifications, num_classes)
 
     # base_model = VGG16(weights='imagenet', include_top=False, input_shape=(48, 48, 3))
     # Add an additional MLP model at the "top" (end) of the network
@@ -137,7 +137,7 @@ def train_network(training_images, training_classifications, validation_images, 
                     use_bias=True,
                     bias_initializer='ones'))
     model.add(Dropout(0.5))
-    model.add(Dense(1, activation='tanh',
+    model.add(Dense(num_classes, activation='softmax',
                     kernel_initializer='glorot_normal',
                     use_bias=True,
                     bias_initializer='zeros'))
@@ -163,7 +163,8 @@ def train_network(training_images, training_classifications, validation_images, 
               batch_size=batch_size,
               epochs=epochs,
               verbose=1,
-              validation_data=(validation_images, validation_classifications))
+              validation_data=(validation_images, validation_classifications),
+              class_weight={0: 1, 1: 100.})
 
     score = model.evaluate(validation_images, validation_classifications, verbose=0)
     print('Test loss:', score[0])
