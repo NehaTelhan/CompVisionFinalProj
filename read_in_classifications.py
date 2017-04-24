@@ -33,7 +33,7 @@ def retrieve_classifications(filename, imgname):
     classification = classification.replace("\"", "")
     num = int(classification)
     if num == 0:
-        num = -1
+        num = 0
     else:
         num = 1
     return num
