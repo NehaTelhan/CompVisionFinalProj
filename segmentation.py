@@ -1,14 +1,10 @@
 """ Vertical and Horizontal Segmentation methods """
 import numpy
+from text_extractor import saliency_map
 
 
-def initial_box(saliency_map):
-    """ a special kind of region-growing algorithm  
-    is employed, where each rectangular region is only allowed
-    to grow by one complete row or column of the rectangle 
-    and the seed position is required to meet a minimal amount
-    of text saliency """
-
+def initial_box():
+    return saliency_map("demo_image.jpg")
 
 
 def set_up(text_box, saliency_map):
@@ -99,10 +95,12 @@ def horizontal(horiz_threshold, horizontal_proj, box, width):
     return box_list
 
 
-
-
 if __name__ == "__main__":
-    text_box = [(0,0), 0, 0]
-    image = [0,0,0,0,0,0,0,0,0,0] # saliency map
-    # only need to call set up for both vertical and horizontal segmentation
-    # set_up(text_box, image)
+    ret = initial_box()
+    print("Real saliency")
+    print(ret[0])
+    all_boxes = []
+    for box in ret[0]:
+        all_boxes.append(set_up(box, ret[1]))
+    print("Printing refined boxes: ")
+    print(all_boxes)
