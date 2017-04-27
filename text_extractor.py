@@ -69,6 +69,7 @@ def saliency_map(image_file):
 
     # Split image into various scales
     image_list = get_gaussian_pyramid(A)
+    print("len image_list", len(image_list))
 
     # Initialize empty saliency map
     saliency_map = numpy.zeros((A.shape[0], A.shape[1]))
@@ -80,8 +81,8 @@ def saliency_map(image_file):
 
         image_height = image.shape[0]
         image_width = image.shape[1]
-
-        start_pixel = (0, 0)  # (row, column)
+        print("len windows", len(windows))
+        start_pixel = [0, 0]  # (row, column)
 
         for window in windows:
             modelFileName = "modelcnn.h5"

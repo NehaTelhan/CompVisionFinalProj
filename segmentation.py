@@ -97,10 +97,9 @@ def horizontal(horiz_threshold, horizontal_proj, box, width):
 
 if __name__ == "__main__":
     ret = initial_box()
-    print("Real saliency")
-    print(ret[0])
+    # print("Real saliency")
+    # print(ret[0])
     all_boxes = []
     for box in ret[0]:
         all_boxes.append(set_up(box, ret[1]))
-    print("Printing refined boxes: ")
-    print(all_boxes)
+    # print("Printing refined boxes: ", all_boxes)
