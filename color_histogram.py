@@ -4,6 +4,12 @@ import skimage.io
 import glob
 import cv2
 
+def ultimate_ans(max, min):
+    if (max < min):
+        return False
+    else:
+        return True
+
 def center_histogram(coordinate, rows, cols):
     '''
     Input is:
@@ -16,8 +22,9 @@ def center_histogram(coordinate, rows, cols):
 
     # for filename in glob.glob('NehaRandoImages/*.jpg'):
     #     image = skimage.io.imread(filename)
-    original_image_path = 'NehaRandoImages/file0001625591306.jpg' #Super Autumn Colors
-    # original_image_path = 'NehaRandoImages/file0001735386118.jpg' #Super Blue Image
+    # original_image_path = 'NehaRandoImages/file0001625591306.jpg' #Super Autumn Colors
+    original_image_path = 'NehaRandoImages/file0001735386118.jpg' #Super Blue Image
+    # original_image_path = 'NehaRandoImages/blackcirclewhitebackground.png'
     original_image = cv2.imread(original_image_path)
     color = ('b', 'g', 'r')
     original_rows = original_image.shape[0]
@@ -74,23 +81,27 @@ def center_histogram(coordinate, rows, cols):
     '''
     max value difference between two histograms is the intensity of the greatest difference in color (intensity = avg od color)
     (SSD)
+    256 slots = intensities
+    number inside slot = number of pixels that are of that intensity
     '''
     # print("HistrA", histrA, len(histrA))
     # print("HistrB", histrB, len(histrB))
-    ssd = []
+    diff_array = []
     for a in histrA:
         for b in histrB:
-            diff = a - b
+            diff = abs(a - b)
             # print("A", a, "B", b , "DIFF" , diff)
-            ssd.append(diff**2)
-    print("MAX", max(ssd))
+            diff_array.append(diff)
 
-    print("Compare:", cv2.compareHist(histrA, histrB, 1))
+    # print("DIFF ARRAY: ", diff_array, min(diff_array), max(diff_array))
+    # Maxxy is how many pixels have that intensity
+    minny = min(diff_array)
+    maxxy = max(diff_array)
 
-    # print("original_rows", original_rows)
-    # print("original cols", original_cols)
-    # print("X_coord", x_pix)
-    # print("Y_coord", y_pix)
+    # print("Min: ", minny, "Max: ", maxxy)
+    # print("Compare:", cv2.compareHist(histrA, histrB, 1))
+    print(ultimate_ans(maxxy, minny))
+    return ultimate_ans(maxxy, minny)
 
 
 if __name__ == "__main__":
