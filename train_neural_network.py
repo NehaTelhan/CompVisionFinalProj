@@ -179,16 +179,19 @@ def train_network(training_images, training_classifications, validation_images, 
 
     return model
 
-
-def neural_network_predict(image, modelFileName):
-    image_input = numpy.zeros((1, 48, 48, 3))
-    image_input[0] = image
-
+def load_cnn_model(modelFileName):
     model = load_model(modelFileName)
 
     model.compile(loss="binary_crossentropy",
                   optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
                   metrics=['accuracy'])
+
+    return model
+
+def neural_network_predict(image, model):
+    image_input = numpy.zeros((1, 48, 48, 3))
+    image_input[0] = image
+
     return model.predict(image_input)[0][1]
 
 
@@ -265,10 +268,13 @@ def read_in_data(training_images_filename, training_classifications_filename, va
 if __name__ == "__main__":
     #images, classifications = read_image_list()
 
-    training_images, training_classifications, validation_images, validation_classifications = read_in_data("training_data/training_images3.npy", "training_data/training_classifications3.npy", "training_data/validation_images3.npy", "training_data/validation_classifications3.npy")
+    A = skimage.transform.resize(skimage.io.imread("txt_1316.jpg"), (48, 48, 3))
+    print(neural_network_predict(A, "modelcnn.h5"))
 
-    print(training_images.shape, training_classifications.shape, validation_images.shape, validation_classifications.shape)
+    #training_images, training_classifications, validation_images, validation_classifications = read_in_data("training_data/training_images3.npy", "training_data/training_classifications3.npy", "training_data/validation_images3.npy", "training_data/validation_classifications3.npy")
 
-    train_network(training_images, training_classifications, validation_images, validation_classifications)
+    #print(training_images.shape, training_classifications.shape, validation_images.shape, validation_classifications.shape)
+
+    #train_network(training_images, training_classifications, validation_images, validation_classifications)
 
     pass
