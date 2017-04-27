@@ -10,30 +10,30 @@ def ultimate_ans(max, min):
     else:
         return True
 
-def center_histogram(coordinate, rows, cols):
-    '''
-    Input is:
-        - I NEED TO CALCULATE THE FOLLOWING BASED OFF THE ORIGINAL IMAGE: start coordinate, height of image, width of image
-        - the "box" around the image as denoted by a start coordinate, height of that "box", and width of the "box"
-        - So take in original picture, the coordinate of the start of the box on the text_box, the number of rows (height) of that textbox and the number of columns of that textbox (width)
-    :return:
-        Two color histograms?!
-    '''
+''' Sadiyah's output is a list of lists where the inner list has this general outline ----- [ [start_x, start_y, text_cols, text_rows]... ]'''
 
-    # for filename in glob.glob('NehaRandoImages/*.jpg'):
-    #     image = skimage.io.imread(filename)
-    # original_image_path = 'NehaRandoImages/file0001625591306.jpg' #Super Autumn Colors
+def color_histogram(list):
+    '''
+    Input is: Runs on single image containing single textbox
+        - I NEED TO CALCULATE THE FOLLOWING BASED OFF THE ORIGINAL IMAGE: start coordinate(0,0), height of image, width of image
+        - the "box" around the text as denoted by a start coordinate, height of that "box", and width of the "box"
+    :return:
+        true or false based on whether the intensity in that image happens closer to the 0 color or 256 color
+    '''
+    original_image_path = 'NehaRandoImages/file0001625591306.jpg' #Super Autumn Colors
     # original_image_path = 'NehaRandoImages/file0001735386118.jpg' #Super Blue Image
-    original_image_path = 'NehaRandoImages/blackcirclewhitebackground.png'
+    # original_image_path = 'NehaRandoImages/blackcirclewhitebackground.png'
     original_image = cv2.imread(original_image_path)
     color = ('b', 'g', 'r')
     original_rows = original_image.shape[0]
     original_cols = original_image.shape[1]
+    # print("Image height:", original_rows)
+    # print("Image width:", original_cols)
 
-    box_height = rows
-    box_width = cols
-    x_pix = coordinate[0]
-    y_pix = coordinate[1]
+    box_height = list[3]
+    box_width = list[2]
+    x_pix = list[0]
+    y_pix = list[1]
 
     #An array to hold the four center rows of the textbox
     center_four_rows = []
@@ -52,7 +52,6 @@ def center_histogram(coordinate, rows, cols):
         plt.plot(histrA, color=col)
         plt.xlim([0,256])
     # plt.show()
-    # print("Histogram A: ", histrA)
 
     '''An array to hold the four outside rows
     two rows from the top of the outside of the textbox
@@ -76,24 +75,18 @@ def center_histogram(coordinate, rows, cols):
         plt.plot(histrB, color=col)
         plt.xlim([0, 256])
     # plt.show()
-    # print("Histogram B: ", histrB)
-
     '''
     max value difference between two histograms is the intensity of the greatest difference in color (intensity = avg od color)
-    (SSD)
-    256 slots = intensities
-    number inside slot = number of pixels that are of that intensity
-    '''
+    256 slots = intensities number inside slot = number of pixels that are of that intensity
+        '''
     # print("HistrA", histrA, len(histrA))
     # print("HistrB", histrB, len(histrB))
     diff_array = []
     for a in histrA:
         for b in histrB:
             diff = abs(a - b)
-            # print("A", a, "B", b , "DIFF" , diff)
             diff_array.append(diff)
 
-    # print("DIFF ARRAY: ", diff_array, min(diff_array), max(diff_array))
     # Maxxy is how many pixels have that intensity
     act_min = min(diff_array)
     min_positions = [i for i, x in enumerate(diff_array) if x == act_min]
@@ -101,13 +94,19 @@ def center_histogram(coordinate, rows, cols):
     act_max = max(diff_array)
     max_positions = [i for i, x in enumerate(diff_array) if x == act_max]
 
-    # print("Act Max: ", act_max, "Max positions: ", max_positions)
-    # print("Act Min: ", act_min, "Min position", min_positions)
-
-    print(ultimate_ans(max_positions[0], min_positions[0]))
-    return ultimate_ans(max_positions[0], min_positions[0])
+    ans = ultimate_ans(max_positions[0], min_positions[0])
+    print(ans)
+    return ans
 
 
 if __name__ == "__main__":
-    center_histogram(coordinate=(20,34), rows=40, cols=120)
+    # Start_xPixel = 0; Start_yPixel=0; textbox_width=10; textbox_height=25
+    color_histogram([0,0,10,25])
 
+    # Start_xPixel = 20; Start_yPixel=34; textbox_width=40; textbox_height=120
+    color_histogram([20,34,40,120])
+
+    test = [[4,8,12,46], [8, 90, 12, 45], [67, 32, 45, 120], [129, 453, 210, 56], [600, 600, 124, 125], [0, 0, 41, 44], [0, 0, 12, 25]]
+
+    for list in test:
+        color_histogram(list)
