@@ -94,8 +94,8 @@ def saliency_map(image_file):
             for i in range(start_pixel[0], start_pixel[0] + int(scale * 48)):
                 for j in range(start_pixel[1], start_pixel[1] + int(scale * 48)):
                     if result >= 0.5:
-                        print("scale", scale)
-                        print("i: ", i, " j: ", j)
+                        # print("scale", scale)
+                        # print("i: ", i, " j: ", j)
                         saliency_map[i][j] += result
 
             if start_pixel[1] + 2 * int(scale * 48) <= image_width:
@@ -115,8 +115,8 @@ def saliency_map(image_file):
             if saliency_checked[i][j] == 0:
                 saliency_checked[i][j] = 1
                 if saliency_map[i][j] >= 0.0:
-                    box = (i, j, 1, 1)  # (row, col, width, height)
-                    old_box = (0, 0, 0, 0)
+                    box = [i, j, 1, 1]  # (row, col, width, height)
+                    old_box = [0, 0, 0, 0]
 
                     th_region = 0.0
 
