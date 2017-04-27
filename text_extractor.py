@@ -64,7 +64,8 @@ def saliency_map(image_file):
     # Convert image to float
     A = skimage.img_as_float(A)
 
-    A = skimage.transform.resize(A, (48, 48, 3))
+    # Only for images from dataset
+    # A = skimage.transform.resize(A, (48, 48, 3))
 
     # Split image into various scales
     image_list = get_gaussian_pyramid(A)
@@ -83,13 +84,13 @@ def saliency_map(image_file):
         start_pixel = (0, 0)  # (row, column)
 
         for window in windows:
-            result = neural_network_predict(window)  # FIXME, no need to resize
-
-            print (result)
+            modelFileName = "modelcnn.h5"
+            result = neural_network_predict(window, modelFileName)  # FIXME, no need to resize
+            # print(result)
 
             for i in range(start_pixel[0], start_pixel[0] + int(48 * scale)):
                 for j in range(start_pixel[1], start_pixel[1] + int(48 * scale)):
-                    if result > -1:
+                    if result >= 0.5:
                         saliency_map[i][j] += result
                         print("SALIENCY", saliency_map[i, j])
 
@@ -103,7 +104,6 @@ def saliency_map(image_file):
     # Extract initial text boxes
     saliency_checked = numpy.zeros(saliency_map.shape)
     print("SALIENCY:", saliency_map)
-
 
     boxes = []
     for i in range(saliency_map.shape[0]):
@@ -174,7 +174,6 @@ def saliency_map(image_file):
 
                     boxes.append(box)
     return [boxes, saliency_map]
-
 
 if __name__ == "__main__":
     print("please pycharm stop giving me this error")

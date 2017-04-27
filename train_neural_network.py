@@ -180,16 +180,16 @@ def train_network(training_images, training_classifications, validation_images, 
     return model
 
 
-def neural_network_predict(image):
+def neural_network_predict(image, modelFileName):
     image_input = numpy.zeros((1, 48, 48, 3))
     image_input[0] = image
 
-    model = load_model("model.h5")
+    model = load_model(modelFileName)
 
-    model.compile(loss="mean_squared_error",
-                  optimizer=RMSprop(),
+    model.compile(loss="binary_crossentropy",
+                  optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
                   metrics=['accuracy'])
-    return model.predict(image_input)[0]
+    return model.predict(image_input)[0][1]
 
 
 def neural_network_predict_filename(filename):
