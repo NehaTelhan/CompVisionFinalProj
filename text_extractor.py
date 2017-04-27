@@ -59,7 +59,7 @@ def get_windows(image):
 def saliency_map(image_file):
     # Read image from filename
     A = skimage.io.imread(image_file)
-    A = skimage.transform.rescale(A, 0.55)
+    A = skimage.transform.rescale(A, 0.25)
     pylab.imshow(A)
     pylab.show()
 
@@ -84,9 +84,9 @@ def saliency_map(image_file):
 
     # Iterate through image scales
     b_count = 0
+    scale = 1.0
     for image in image_list:
         b_count += 1
-        scale = 1.0
         windows = get_windows(image)
         # print("Window length:", len(windows))
 
@@ -95,13 +95,13 @@ def saliency_map(image_file):
 
         for window in windows:
             result = neural_network_predict(window, model)
-            pylab.imshow(window)
-            pylab.show()
+            # pylab.imshow(window)
+            # pylab.show()
             print("result:", result)
 
             for i in range(start_pixel[0], start_pixel[0] + int(scale * 48)):
                 for j in range(start_pixel[1], start_pixel[1] + int(scale * 48)):
-                    if result >= 0.52:
+                    if result >= 0.5:
                         # print("scale", scale)
                         # print("i: ", i, " j: ", j)
                         saliency_map[i][j] += result
@@ -114,11 +114,13 @@ def saliency_map(image_file):
 
         scale *= 1.5
 
-        if b_count == 1:
-            break
+        # if b_count == 1:
+        #     break
 
     pylab.imshow(saliency_map, cmap='gray')
     pylab.show()
+    print(saliency_map)
+    quit()
 
     # Extract initial text boxes
     saliency_checked = numpy.zeros(saliency_map.shape)
@@ -206,7 +208,7 @@ def saliency_map(image_file):
 if __name__ == "__main__":
     print("please pycharm stop giving me this error")
 
-    result = saliency_map("training_set/13.jpg")
+    result = saliency_map("demo-image1.jpg")
 
     pylab.imshow(skimage.color.rgb2gray(result[1]))
     pylab.show()
