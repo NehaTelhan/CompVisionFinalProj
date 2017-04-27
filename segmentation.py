@@ -1,6 +1,7 @@
 """ Vertical and Horizontal Segmentation methods """
 import numpy
 from text_extractor import saliency_map
+BOX_LIST = []
 
 
 def initial_box():
@@ -38,13 +39,15 @@ def set_up(text_box, saliency_map):
 
     print("trying to do vert projections")
     # vertical projection = sum of pixel intensities over every row
-    vert_proj = [sum(full_box[i]) for i in range(height)]
+    # vert_proj = [sum(full_box[i]) for i in range(height)]
+    vert_proj = numpy.sum(full_box, axis=0)
     min_vert = min(vert_proj)
     max_vert = max(vert_proj)
 
     print("trying to do horizontal projections")
     # horizontal projection = sum of pixel intensities over every column
-    horizontal_proj = [sum(full_box[:, i]) for i in range(width)]
+    horizontal_proj = numpy.sum(full_box, axis=1)
+    # horizontal_proj = [sum(full_box[i]) for i in range(width)]
     min_horiz = min(horizontal_proj)
     max_horiz = max(horizontal_proj)
 
@@ -53,11 +56,9 @@ def set_up(text_box, saliency_map):
     # THESE VALUES WILL CHANGE ITS JUST BC I WANNA SET UP LOGIC OF CODE
     vert_seg_thresh = (min_vert, max_vert)
     horiz_seg_thresh = (min_horiz, max_horiz)
-    new_box = [starting_pixel, width, height]
-    vert_box_list = vertical(vert_seg_thresh, vert_proj, new_box, height)
-    horiz_box_list = horizontal(horiz_seg_thresh, horizontal_proj, new_box, width)
-
-    return [vert_box_list, horiz_box_list]
+    new_box = [starting_pixel[0], starting_pixel[1], width, height]
+    vertical(vert_seg_thresh, vert_proj, new_box, height)
+    horizontal(horiz_seg_thresh, horizontal_proj, new_box, width)
 
 
 def vertical(vert_threshold, vert_proj, box, height):
@@ -65,7 +66,6 @@ def vertical(vert_threshold, vert_proj, box, height):
     change = False
     upper_bound = None
     lower_bound = None
-    box_list = []
     for i in range(0, height):
         if vert_proj[i] > vert_threshold[0]:
             if upper_bound is None:
@@ -74,27 +74,25 @@ def vertical(vert_threshold, vert_proj, box, height):
             if lower_bound is None:
                 lower_bound = i
             if upper_bound is not None:
-                new_box = [box[0], box[1], upper_bound, lower_bound]
-                box_list.append(new_box)
+                # new_box = [box[0], box[1], upper_bound, lower_bound]
+                BOX_LIST.append([box[0], box[1], upper_bound, lower_bound])
                 upper_bound = None
                 lower_bound = None
                 change = True
-    return box_list
 
 
 def horizontal(horiz_threshold, horizontal_proj, box, width):
     """ loop through all columns of profile to set boundaries """
     left_bound = None
     right_bound = None
-    box_list = []
     for i in range(0, width):
         if horizontal_proj[i] > horiz_threshold[0]:
             if left_bound is None:
                 left_bound = i
             elif right_bound is not None:
                 if abs(i-right_bound) > horiz_threshold[0]: # wth is large enough?
-                    new_box = [box[0], box[1], left_bound, right_bound]
-                    box_list.append(new_box)
+                    # new_box = [box[0], box[1], left_bound, right_bound]
+                    BOX_LIST.append([box[0], box[1], left_bound, right_bound])
                     left_bound = None
                     right_bound = None
                 else:
@@ -105,10 +103,8 @@ def horizontal(horiz_threshold, horizontal_proj, box, width):
     if left_bound is not None and right_bound is None:
         right_bound = width
     if left_bound is not None and right_bound is not None:
-        new_box = [box[0], box[1], left_bound, right_bound]
-        box_list.append(new_box)
-
-    return box_list
+        # new_box = [box[0], box[1], left_bound, right_bound]
+        BOX_LIST.append([box[0], box[1], left_bound, right_bound])
 
 
 if __name__ == "__main__":
@@ -117,7 +113,25 @@ if __name__ == "__main__":
     # print("sal_map", ret[1])
     # print("Real saliency")
     # print(ret[0])
-    all_boxes = []
     for box in ret[0]:
-        all_boxes.append(set_up(box, ret[1]))
-    print("Printing refined boxes: ", all_boxes)
+        set_up(box, ret[1])
+    # print(BOX_LIST)
+    print("length of originals", len(ret[0]))
+    print("len Box List", len(BOX_LIST))
+    outfile = open("seg_boxes.txt", 'w')
+    for item in BOX_LIST:
+        outfile.write("%s\n" % item)
+    # old_boxes = ret[0]
+    # same = []
+    # offset = 100
+    # for i in range(0, len(old_boxes)):
+    #     old_x = old_boxes[i][0]
+    #     old_y = old_boxes[i][1]
+    #     for j in range(0, len(BOX_LIST)):
+    #         # print(BOX_LIST[j])
+    #         vert_x = BOX_LIST[j][0]
+    #         vert_y = BOX_LIST[j][1]
+    #         if vert_x + offset > old_x > vert_x - offset and vert_y + offset > old_y > vert_y - offset:
+    #             same.append(BOX_LIST[j])
+    # print("len same", len(same))
+    # print(same)
