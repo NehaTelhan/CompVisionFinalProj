@@ -4,7 +4,7 @@ from text_extractor import saliency_map
 
 
 def initial_box():
-    return saliency_map("demo_image.jpg")
+    return saliency_map("demo-image1.jpg")
 
 
 def set_up(text_box, saliency_map):
