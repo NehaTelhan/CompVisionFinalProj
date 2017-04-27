@@ -20,7 +20,7 @@
 
 # Import some libraries
 import numpy, math, sys, glob
-import skimage.io, skimage.transform, pylab
+import skimage.io, skimage.transform, pylab, skimage.color
 import scipy.ndimage.filters, scipy.signal, scipy.misc
 
 from window_divider import divide_picture_to_windows, convertWindowToArray
@@ -58,6 +58,9 @@ def get_windows(image):
 def saliency_map(image_file):
     # Read image from filename
     A = skimage.io.imread(image_file)
+    A = skimage.transform.rescale(A, 0.25)
+    pylab.imshow(A)
+    pylab.show()
 
     # Convert image to float
     # A = skimage.img_as_float(A)
@@ -94,16 +97,21 @@ def saliency_map(image_file):
             for i in range(start_pixel[0], start_pixel[0] + int(scale * 48)):
                 for j in range(start_pixel[1], start_pixel[1] + int(scale * 48)):
                     if result >= 0.5:
-                        print("scale", scale)
-                        print("i: ", i, " j: ", j)
+                        # print("scale", scale)
+                        # print("i: ", i, " j: ", j)
                         saliency_map[i][j] += result
 
             if start_pixel[1] + 2 * int(scale * 48) <= image_width:
                 start_pixel[1] += int(scale * 48)
             elif start_pixel[0] + 2 * int(scale * 48) <= image_height:
                 start_pixel[0] += int(scale * 48)
+                start_pixel[1] = 0
 
         scale *= 1.5
+        break
+
+    pylab.imshow(saliency_map, cmap='gray')
+    pylab.show()
 
     # Extract initial text boxes
     saliency_checked = numpy.zeros(saliency_map.shape)
@@ -113,20 +121,25 @@ def saliency_map(image_file):
     for i in range(saliency_map.shape[0]):
         for j in range(saliency_map.shape[1]):
             if saliency_checked[i][j] == 0:
+                print(i, j)
                 saliency_checked[i][j] = 1
-                if saliency_map[i][j] >= 0.0:
-                    box = (i, j, 1, 1)  # (row, col, width, height)
-                    old_box = (0, 0, 0, 0)
+                if saliency_map[i][j] >= 0.5:
+                    box = [i, j, 1, 1]  # (row, col, width, height)
+                    old_box = [0, 0, 0, 0]
 
-                    th_region = 0.0
+                    th_region = 0.5
 
-                    while box is not old_box:
-                        old_box = box
+                    while not (old_box[0] == box[0] and old_box[1] == box[1] and old_box[2] == box[2] and old_box[3] == box[3]):
+                        old_box = []
+                        old_box.append(box[0])
+                        old_box.append(box[1])
+                        old_box.append(box[2])
+                        old_box.append(box[3])
 
                         if box[0] - 1 >= 0:
                             sum = 0.0
                             for ii in range(box[2]):
-                                print(saliency_map[box[0]-1][box[1]+ii])
+                                #print(saliency_map[box[0]-1][box[1]+ii])
                                 sum += saliency_map[box[0]-1][box[1]+ii]
                             print("case 1:", sum)
                             sum /= box[2]
@@ -151,37 +164,46 @@ def saliency_map(image_file):
                                 box[1] -= 1
                                 box[2] += 1
 
-                        if box[0] + 1 < saliency_map.shape[0]:
+                        if box[0] + box[3] < saliency_map.shape[0]:
                             sum = 0.0
                             for ii in range(box[2]):
-                                sum += saliency_map[box[0]+1][box[1]+ii]
+                                sum += saliency_map[box[0]+box[3]][box[1]+ii]
                             print("case 3:", sum)
 
                             sum /= box[2]
 
                             if sum > th_region:
                                 for ii in range(box[2]):
-                                    saliency_checked[box[0]+1][box[1]+ii] = 1
+                                    saliency_checked[box[0]+box[3]][box[1]+ii] = 1
                                 box[3] += 1
 
-                        if box[1] + 1 < saliency_map.shape[1]:
+                        if box[1] + box[2] < saliency_map.shape[1]:
                             sum = 0.0
                             for ii in range(box[3]):
-                                sum += saliency_map[box[0]+ii][box[1]+1]
+                                sum += saliency_map[box[0]+ii][box[1]+box[2]]
                             print("case 4:", sum)
                             sum /= box[3]
 
                             if sum > th_region:
                                 for ii in range(box[3]):
-                                    saliency_checked[box[0]+ii][box[1]+1] = 1
+                                    saliency_checked[box[0]+ii][box[1]+box[2]] = 1
                                 box[2] += 1
 
+                        #print("Old:", old_box)
+                        #print("New:", box)
+
+                    print("added box", box)
                     boxes.append(box)
     return [boxes, saliency_map]
 
 if __name__ == "__main__":
     print("please pycharm stop giving me this error")
-    saliency_map("demo_image.jpg")
+    result = saliency_map("demo-image1.jpg")
+    pylab.imshow(skimage.color.rgb2gray(result[1]))
+    pylab.show()
+    print(result[1])
+    print(result[0])
+
     # Image cmd line param
     # image_file = sys.argv[1]
     #
