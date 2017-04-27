@@ -108,7 +108,6 @@ def saliency_map(image_file):
                 start_pixel[1] = 0
 
         scale *= 1.5
-        break
 
     pylab.imshow(saliency_map, cmap='gray')
     pylab.show()
