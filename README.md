@@ -46,3 +46,18 @@
 #### Rescale to height 100 pixels (text box bitmap) (Neha)
 #### Remove Backgroud (Allison)
 #### Binarize (Allison)
+
+---------------------------------------------------------------------------------------------------------------
+### Week 4!
+
+#### Edge Detection (John - Done)
+#### Gaussian Pyramid (Neha - Done)
+#### 20x 10 (Allison - Done)
+#### Neural Networks - written not trained
+#### Saliency Map (John)
+#### Vertical Segementation (Sadiyah)
+#### Horizontal Segmentation (Sadiyah)
+#### Color Histogram (Neha - Done)
+#### Rescale to height 100 pixels (text box bitmap) (Neha - In Progres...)
+#### Remove Backgroud (Allison - Done)
+#### Binarize (Allison - Done)
