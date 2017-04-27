@@ -95,9 +95,9 @@ def saliency_map(image_file):
                         saliency_map[i][j] += result
 
             if start_pixel[0] + 48 < image_height:
-                start_pixel[0] += 48
+                start_pixel[0] += int(scale * 48)
             elif start_pixel[1] + 48 < image_width:
-                start_pixel[1] += 48
+                start_pixel[1] += int(scale * 48)
 
         scale *= 1.5
 
