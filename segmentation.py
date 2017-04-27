@@ -17,25 +17,38 @@ def set_up(text_box, saliency_map):
     offset = int(height/2) # SHOULD I BE CASTING TO INT HERE IDK
     starting_pixel[1] = starting_pixel[1] - offset
     height = height + offset
-    full_box = numpy.empty((width, height))
 
     # building the full text_box to do the projection on
-    print("width", width)
-    print("height", height)
-    for x in range(0, width):
-        for y in range(0, height):
+    # print("width", width)
+    # print("height", height)
+    if height > saliency_map.shape[0]:
+        height = saliency_map.shape[0]
+    if width > saliency_map.shape[1]:
+        width = saliency_map.shape[1]
+    full_box = numpy.empty((height, width))
+    for x in range(0, height):
+        for y in range(0, width):
             i = starting_pixel[0] + x
             j = starting_pixel[1] + y
             # print("i", i)
             # print("j", j)
             if i >= width and j >= height:
                 full_box[x][y] = saliency_map[width][height]
+                continue
             elif i >= width and j < height:
                 full_box[x][y] = saliency_map[width][j]
+                continue
             elif i < width and j >= height:
                 full_box[x][y] = saliency_map[i][height]
+                continue
             else:
+                # print(height, width)
+                # print(full_box.shape[0], full_box.shape[1])
+                # print("sal_map", saliency_map.shape[0], saliency_map.shape[1])
+                # print("x", x, "y", y)
+                # print("i", i, "j", j)
                 full_box[x][y] = saliency_map[i][j]
+                continue
 
     print("trying to do vert projections")
     # vertical projection = sum of pixel intensities over every row
@@ -66,7 +79,8 @@ def vertical(vert_threshold, vert_proj, box, height):
     change = False
     upper_bound = None
     lower_bound = None
-    for i in range(0, height):
+    for i in range(0, len(vert_proj)):
+        # print("i", i, "height", height)
         if vert_proj[i] > vert_threshold[0]:
             if upper_bound is None:
                 upper_bound = i
@@ -85,7 +99,7 @@ def horizontal(horiz_threshold, horizontal_proj, box, width):
     """ loop through all columns of profile to set boundaries """
     left_bound = None
     right_bound = None
-    for i in range(0, width):
+    for i in range(0, len(horizontal_proj)):
         if horizontal_proj[i] > horiz_threshold[0]:
             if left_bound is None:
                 left_bound = i
@@ -121,6 +135,7 @@ if __name__ == "__main__":
     outfile = open("seg_boxes.txt", 'w')
     for item in BOX_LIST:
         outfile.write("%s\n" % item)
+    print("end")
     # old_boxes = ret[0]
     # same = []
     # offset = 100

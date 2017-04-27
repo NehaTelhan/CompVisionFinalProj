@@ -120,7 +120,7 @@ def saliency_map(image_file):
     pylab.imshow(saliency_map, cmap='gray')
     pylab.show()
     print(saliency_map)
-    quit()
+    # quit()
 
     # Extract initial text boxes
     saliency_checked = numpy.zeros(saliency_map.shape)
