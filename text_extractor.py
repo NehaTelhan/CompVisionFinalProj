@@ -55,6 +55,7 @@ def get_windows(image):
 
     return images
 
+
 def saliency_map(image_file):
     # Read image from filename
     A = skimage.io.imread(image_file)
@@ -193,6 +194,10 @@ def saliency_map(image_file):
 
                     print("added box", box)
                     boxes.append(box)
+    f = open("boxes.json", 'w')
+    f.write(boxes)
+    f2 = open("sal_map.json", 'w')
+    f2.write(saliency_map)
     return [boxes, saliency_map]
 
 if __name__ == "__main__":
