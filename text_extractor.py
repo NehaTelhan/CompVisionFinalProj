@@ -92,8 +92,8 @@ def saliency_map(image_file):
             result = neural_network_predict(window, model)
             print("result:", result)
 
-            for i in range(start_pixel[0], start_pixel[0] + int(48 * scale)):
-                for j in range(start_pixel[1], start_pixel[1] + int(48 * scale)):
+            for i in range(int(scale * start_pixel[0]), int(scale * (start_pixel[0] + 48))):
+                for j in range(int(scale * start_pixel[1]), int(scale * (start_pixel[1] + 48))):
                     if result >= 0.5:
                         saliency_map[i][j] += result
 
