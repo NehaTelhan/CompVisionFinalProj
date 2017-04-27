@@ -85,24 +85,22 @@ def saliency_map(image_file):
         # print("Window length:", len(windows))
 
         print("len windows", len(windows))
-        start_pixel = [0, 0]  # (row, column)
-
-        start_pixel = [0, 0]  # (row, column)
+        start_pixel = [0, 0]  # (row, column) (height, width)
 
         for window in windows:
             result = neural_network_predict(window, model)
             print("result:", result)
 
-            for i in range(int(scale * start_pixel[0]), int(scale * (start_pixel[0] + 48))):
-                for j in range(int(scale * start_pixel[1]), int(scale * (start_pixel[1] + 48))):
+            for i in range(start_pixel[0], start_pixel[0] + int(scale * 48)):
+                for j in range(start_pixel[1], start_pixel[1] + int(scale * 48)):
                     if result >= 0.5:
                         print("scale", scale)
                         print("i: ", i, " j: ", j)
                         saliency_map[i][j] += result
 
-            if start_pixel[1] + 48 < image_width:
+            if start_pixel[1] + int(scale * 48) <= image_width:
                 start_pixel[1] += int(scale * 48)
-            elif start_pixel[0] + 48 < image_height:
+            elif start_pixel[0] + int(scale * 48) <= image_height:
                 start_pixel[0] += int(scale * 48)
 
         scale *= 1.5
