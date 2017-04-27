@@ -23,8 +23,8 @@ def center_histogram(coordinate, rows, cols):
     # for filename in glob.glob('NehaRandoImages/*.jpg'):
     #     image = skimage.io.imread(filename)
     # original_image_path = 'NehaRandoImages/file0001625591306.jpg' #Super Autumn Colors
-    original_image_path = 'NehaRandoImages/file0001735386118.jpg' #Super Blue Image
-    # original_image_path = 'NehaRandoImages/blackcirclewhitebackground.png'
+    # original_image_path = 'NehaRandoImages/file0001735386118.jpg' #Super Blue Image
+    original_image_path = 'NehaRandoImages/blackcirclewhitebackground.png'
     original_image = cv2.imread(original_image_path)
     color = ('b', 'g', 'r')
     original_rows = original_image.shape[0]
@@ -51,8 +51,8 @@ def center_histogram(coordinate, rows, cols):
         plt.title('Histogram for Text Boxs 4 Center Rows')
         plt.plot(histrA, color=col)
         plt.xlim([0,256])
-    plt.show()
-    print("Histogram A: ", histrA)
+    # plt.show()
+    # print("Histogram A: ", histrA)
 
     '''An array to hold the four outside rows
     two rows from the top of the outside of the textbox
@@ -75,8 +75,8 @@ def center_histogram(coordinate, rows, cols):
         plt.title('Histogram for Entire Images 2 Upper/Lower Rows')
         plt.plot(histrB, color=col)
         plt.xlim([0, 256])
-    plt.show()
-    print("Histogram B: ", histrB)
+    # plt.show()
+    # print("Histogram B: ", histrB)
 
     '''
     max value difference between two histograms is the intensity of the greatest difference in color (intensity = avg od color)
@@ -95,13 +95,17 @@ def center_histogram(coordinate, rows, cols):
 
     # print("DIFF ARRAY: ", diff_array, min(diff_array), max(diff_array))
     # Maxxy is how many pixels have that intensity
-    minny = min(diff_array)
-    maxxy = max(diff_array)
+    act_min = min(diff_array)
+    min_positions = [i for i, x in enumerate(diff_array) if x == act_min]
 
-    # print("Min: ", minny, "Max: ", maxxy)
-    # print("Compare:", cv2.compareHist(histrA, histrB, 1))
-    print(ultimate_ans(maxxy, minny))
-    return ultimate_ans(maxxy, minny)
+    act_max = max(diff_array)
+    max_positions = [i for i, x in enumerate(diff_array) if x == act_max]
+
+    # print("Act Max: ", act_max, "Max positions: ", max_positions)
+    # print("Act Min: ", act_min, "Min position", min_positions)
+
+    print(ultimate_ans(max_positions[0], min_positions[0]))
+    return ultimate_ans(max_positions[0], min_positions[0])
 
 
 if __name__ == "__main__":
