@@ -1,7 +1,7 @@
 import numpy
 import scipy.misc
 
-# Expected input: Skimage.img_as_float in grayscale from gaussian pyramid
+# Expected input: Image from gaussian pyramid
 def divide_picture_to_windows(picture):
     height = picture.shape[0] + 1
     width = picture.shape[1] + 1
@@ -17,12 +17,13 @@ def divide_picture_to_windows(picture):
 
     for y in range(0, height - height_of_window, y_step):
         for x in range(0, width - width_of_window, x_step):
-            print(x,y)
+            # print(x,y)
             count = count + 1
             window = numpy.zeros((height_of_window, width_of_window, 3))
             for j in range(height_of_window):
                 for i in range(width_of_window):
-                    window[j, i] = picture[y, x]
+                    window[j, i] = picture[y + j, x + i]
+                    # print("Picture pixel:", window[j, i])
             list_of_windows.append(window)
 
             # Save picture
@@ -33,7 +34,6 @@ def divide_picture_to_windows(picture):
         windows[i] = list_of_windows[i]
 
     return windows
-
 
 def convertWindowToArray(window):
     array = numpy.zeros(200)

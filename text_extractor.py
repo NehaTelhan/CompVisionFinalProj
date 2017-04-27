@@ -24,7 +24,7 @@ import skimage.io, skimage.transform, pylab
 import scipy.ndimage.filters, scipy.signal, scipy.misc
 
 from window_divider import divide_picture_to_windows, convertWindowToArray
-from train_neural_network import neural_network_predict_filename, neural_network_predict
+from train_neural_network import neural_network_predict_filename, neural_network_predict, load_cnn_model
 
 
 def get_gaussian_pyramid(input_image):
@@ -39,13 +39,12 @@ def get_gaussian_pyramid(input_image):
 
     while int((2 / 3) * rows) > height_of_window and int((2 / 3) * cols) > width_of_window:
 
-        resized_image = skimage.transform.resize(input_image, (int((2 / 3) * rows), int((2 / 3) * cols)))
+        resized_image = skimage.transform.resize(input_image, (int((2 / 3) * rows), int((2 / 3) * cols), 3))
         images.append(resized_image)
         rows = int((2 / 3) * rows)
         cols = int((2 / 3) * cols)
 
     return images
-
 
 def get_windows(image):
     images = []
@@ -56,13 +55,12 @@ def get_windows(image):
 
     return images
 
-
 def saliency_map(image_file):
     # Read image from filename
-    A = skimage.io.imread(image_file, True)
+    A = skimage.io.imread(image_file)
 
     # Convert image to float
-    A = skimage.img_as_float(A)
+    # A = skimage.img_as_float(A)
 
     # Only for images from dataset
     # A = skimage.transform.resize(A, (48, 48, 3))
@@ -73,26 +71,28 @@ def saliency_map(image_file):
     # Initialize empty saliency map
     saliency_map = numpy.zeros((A.shape[0], A.shape[1]))
 
+    # Load model
+    model = load_cnn_model("modelcnn.h5")
+
     # Iterate through image scales
     for image in image_list:
         scale = 1.0
         windows = get_windows(image)
+        # print("Window length:", len(windows))
 
         image_height = image.shape[0]
         image_width = image.shape[1]
 
-        start_pixel = (0, 0)  # (row, column)
+        start_pixel = [0, 0]  # (row, column)
 
         for window in windows:
-            modelFileName = "modelcnn.h5"
-            result = neural_network_predict(window, modelFileName)  # FIXME, no need to resize
-            # print(result)
+            result = neural_network_predict(window, model)
+            print("result:", result)
 
             for i in range(start_pixel[0], start_pixel[0] + int(48 * scale)):
                 for j in range(start_pixel[1], start_pixel[1] + int(48 * scale)):
                     if result >= 0.5:
                         saliency_map[i][j] += result
-                        print("SALIENCY", saliency_map[i, j])
 
             if start_pixel[0] + 48 < image_height:
                 start_pixel[0] += 48
@@ -177,6 +177,7 @@ def saliency_map(image_file):
 
 if __name__ == "__main__":
     print("please pycharm stop giving me this error")
+    saliency_map("demo_image.jpg")
     # Image cmd line param
     # image_file = sys.argv[1]
     #
