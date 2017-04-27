@@ -55,6 +55,7 @@ def get_windows(image):
 
     return images
 
+
 def saliency_map(image_file):
     # Read image from filename
     A = skimage.io.imread(image_file)

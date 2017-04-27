@@ -4,29 +4,45 @@ from text_extractor import saliency_map
 
 
 def initial_box():
+    print("got to initial_box")
     return saliency_map("demo-image1.jpg")
 
 
 def set_up(text_box, saliency_map):
     # text_box = [starting_pixel, width, height]
-    starting_pixel = text_box[0] # should be a tuple, (x, y)
-    width = text_box[1] # num columns
-    height = text_box[2] # num rows
-    full_box = numpy.empty(width, height)
+    starting_pixel = [text_box[0], text_box[1]] # should be a tuple, (x, y)
+    width = int(text_box[2]) # num columns
+    height = int(text_box[3]) # num rows
     offset = int(height/2) # SHOULD I BE CASTING TO INT HERE IDK
     starting_pixel[1] = starting_pixel[1] - offset
     height = height + offset
+    full_box = numpy.empty((width, height))
 
     # building the full text_box to do the projection on
+    print("width", width)
+    print("height", height)
     for x in range(0, width):
         for y in range(0, height):
-            full_box[x][y] = saliency_map[starting_pixel[0] + x][starting_pixel[1] + y]
+            i = starting_pixel[0] + x
+            j = starting_pixel[1] + y
+            # print("i", i)
+            # print("j", j)
+            if i >= width and j >= height:
+                full_box[x][y] = saliency_map[width][height]
+            elif i >= width and j < height:
+                full_box[x][y] = saliency_map[width][j]
+            elif i < width and j >= height:
+                full_box[x][y] = saliency_map[i][height]
+            else:
+                full_box[x][y] = saliency_map[i][j]
 
+    print("trying to do vert projections")
     # vertical projection = sum of pixel intensities over every row
     vert_proj = [sum(full_box[i]) for i in range(height)]
     min_vert = min(vert_proj)
     max_vert = max(vert_proj)
 
+    print("trying to do horizontal projections")
     # horizontal projection = sum of pixel intensities over every column
     horizontal_proj = [sum(full_box[:, i]) for i in range(width)]
     min_horiz = min(horizontal_proj)
@@ -58,7 +74,7 @@ def vertical(vert_threshold, vert_proj, box, height):
             if lower_bound is None:
                 lower_bound = i
             if upper_bound is not None:
-                new_box = [box[0], upper_bound, lower_bound]
+                new_box = [box[0], box[1], upper_bound, lower_bound]
                 box_list.append(new_box)
                 upper_bound = None
                 lower_bound = None
@@ -77,7 +93,7 @@ def horizontal(horiz_threshold, horizontal_proj, box, width):
                 left_bound = i
             elif right_bound is not None:
                 if abs(i-right_bound) > horiz_threshold[0]: # wth is large enough?
-                    new_box = [box[0], left_bound, right_bound]
+                    new_box = [box[0], box[1], left_bound, right_bound]
                     box_list.append(new_box)
                     left_bound = None
                     right_bound = None
@@ -89,7 +105,7 @@ def horizontal(horiz_threshold, horizontal_proj, box, width):
     if left_bound is not None and right_bound is None:
         right_bound = width
     if left_bound is not None and right_bound is not None:
-        new_box = [box[0], left_bound, right_bound]
+        new_box = [box[0], box[1], left_bound, right_bound]
         box_list.append(new_box)
 
     return box_list
@@ -97,9 +113,11 @@ def horizontal(horiz_threshold, horizontal_proj, box, width):
 
 if __name__ == "__main__":
     ret = initial_box()
+    # print("boxes", ret[0])
+    # print("sal_map", ret[1])
     # print("Real saliency")
     # print(ret[0])
     all_boxes = []
     for box in ret[0]:
         all_boxes.append(set_up(box, ret[1]))
-    # print("Printing refined boxes: ", all_boxes)
+    print("Printing refined boxes: ", all_boxes)
