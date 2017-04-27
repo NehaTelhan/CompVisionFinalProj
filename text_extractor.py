@@ -119,8 +119,6 @@ def saliency_map(image_file):
 
     pylab.imshow(saliency_map, cmap='gray')
     pylab.show()
-    print(saliency_map)
-    # quit()
 
     # Extract initial text boxes
     saliency_checked = numpy.zeros(saliency_map.shape)
@@ -132,11 +130,11 @@ def saliency_map(image_file):
             if saliency_checked[i][j] == 0:
                 print(i, j)
                 saliency_checked[i][j] = 1
-                if saliency_map[i][j] >= 0.5:
+                if saliency_map[i][j] >= 3:
                     box = [i, j, 1, 1]  # (row, col, width, height)
                     old_box = [0, 0, 0, 0]
 
-                    th_region = 0.5
+                    th_region = 2.7
 
                     while not (old_box[0] == box[0] and old_box[1] == box[1] and old_box[2] == box[2] and old_box[3] == box[3]):
                         old_box = []
