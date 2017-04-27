@@ -75,14 +75,15 @@ def saliency_map(image_file):
     # Load model
     model = load_cnn_model("modelcnn.h5")
 
+    image_height = A.shape[0]
+    image_width = A.shape[1]
+
     # Iterate through image scales
     for image in image_list:
         scale = 1.0
         windows = get_windows(image)
         # print("Window length:", len(windows))
 
-        image_height = image.shape[0]
-        image_width = image.shape[1]
         print("len windows", len(windows))
         start_pixel = [0, 0]  # (row, column)
 
@@ -95,12 +96,14 @@ def saliency_map(image_file):
             for i in range(int(scale * start_pixel[0]), int(scale * (start_pixel[0] + 48))):
                 for j in range(int(scale * start_pixel[1]), int(scale * (start_pixel[1] + 48))):
                     if result >= 0.5:
+                        print("scale", scale)
+                        print("i: ", i, " j: ", j)
                         saliency_map[i][j] += result
 
-            if start_pixel[0] + 48 < image_height:
-                start_pixel[0] += int(scale * 48)
-            elif start_pixel[1] + 48 < image_width:
+            if start_pixel[1] + 48 < image_width:
                 start_pixel[1] += int(scale * 48)
+            elif start_pixel[0] + 48 < image_height:
+                start_pixel[0] += int(scale * 48)
 
         scale *= 1.5
 
