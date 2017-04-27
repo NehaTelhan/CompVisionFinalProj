@@ -4,6 +4,7 @@ from text_extractor import saliency_map
 
 
 def initial_box():
+    print("got to initial_box")
     return saliency_map("demo-image1.jpg")
 
 
@@ -97,9 +98,11 @@ def horizontal(horiz_threshold, horizontal_proj, box, width):
 
 if __name__ == "__main__":
     ret = initial_box()
+    print("boxes", ret[0])
+    print("sal_map", ret[1])
     # print("Real saliency")
     # print(ret[0])
-    all_boxes = []
-    for box in ret[0]:
-        all_boxes.append(set_up(box, ret[1]))
+    # all_boxes = []
+    # for box in ret[0]:
+    #     all_boxes.append(set_up(box, ret[1]))
     # print("Printing refined boxes: ", all_boxes)
