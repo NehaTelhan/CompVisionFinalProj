@@ -135,6 +135,7 @@ if __name__ == "__main__":
     outfile = open("seg_boxes.txt", 'w')
     for item in BOX_LIST:
         outfile.write("%s\n" % item)
+    print(ret[0])
     print("end")
     # old_boxes = ret[0]
     # same = []
