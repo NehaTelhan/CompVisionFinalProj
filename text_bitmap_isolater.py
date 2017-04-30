@@ -4,51 +4,60 @@ import pylab
 import skimage.color, skimage.io
 
 # Input original image in color as float array
-def remove_background(original_image, box_start_row, box_start_col, box_width, box_height, is_text_inverse):
-    original_image = skimage.img_as_float(original_image)
-    threshold_seedfill = 1.1
+def remove_background(image, box_start_row, box_start_col, box_width, box_height, is_text_inverse):
+    image = skimage.img_as_float(image)
 
-    height = original_image.shape[0]
-    width = original_image.shape[1]
+    height = image.shape[0]
+    width = image.shape[1]
+
+    original_image = numpy.zeros((height, width, 3))
+    for j in range(height):
+        for i in range(width):
+            original_image[j, i] = image[j, i]
+
+    threshold_seedfill = 0.3
 
     box_end_row = box_start_row + box_height - 1
     box_end_col = box_start_col + box_width - 1
 
     # Increase text bounding box
-    # width_expansion = int(box_width * 0.1)
-    # if box_start_col <= width_expansion:
-    #     box_start_col = 0
-    # else:
-    #     box_start_col = box_start_col - width_expansion
-    # if box_end_col + width_expansion >= width:
-    #     box_end_col = width - 1
-    # else:
-    #     box_end_col = box_end_col + width_expansion
-    #
-    # height_expansion = int(box_height * 0.2)
-    # if box_start_row <= height_expansion:
-    #     box_start_row = 0
-    # else:
-    #     box_start_row = box_start_row - height_expansion
-    # if box_end_row + height_expansion >= height:
-    #     box_end_row = height - 1
-    # else:
-    #     box_end_row = box_end_row + height_expansion
+    width_expansion = int(box_width * 0.2)
+    if box_start_col <= width_expansion:
+        box_start_col = 0
+    else:
+        box_start_col = box_start_col - width_expansion
+    if box_end_col + width_expansion >= width:
+        box_end_col = width - 1
+    else:
+        box_end_col = box_end_col + width_expansion
+
+    height_expansion = int(box_height * 0.1)
+    if box_start_row <= height_expansion:
+        box_start_row = 0
+    else:
+        box_start_row = box_start_row - height_expansion
+    if box_end_row + height_expansion >= height:
+        box_end_row = height - 1
+    else:
+        box_end_row = box_end_row + height_expansion
 
     # Background color
     color = [1, 1, 1]
     if is_text_inverse:
         color = [0, 0, 0]
 
-    # box_height = box_end_row - box_start_row + 1
-    # box_width = box_end_col - box_start_col + 1
+    box_height = box_end_row - box_start_row + 1
+    box_width = box_end_col - box_start_col + 1
     box = numpy.zeros((box_height, box_width))
 
     # Take pixel on boundary as seed to fill all pixels with background color which do not differ more than threshold
     # left
     for i in range(box_height):
         pixels_to_check = [(i, 0)]
-        boundary_color = original_image[i + box_start_row, box_start_col]
+        boundary_color = []
+        boundary_color.append(original_image[i + box_start_row, box_start_col, 0])
+        boundary_color.append(original_image[i + box_start_row, box_start_col, 1])
+        boundary_color.append(original_image[i + box_start_row, box_start_col, 2])
         box[i, 0] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
@@ -73,7 +82,10 @@ def remove_background(original_image, box_start_row, box_start_col, box_width, b
     # top
     for j in range(box_width):
         pixels_to_check = [(0, j)]
-        boundary_color = original_image[box_start_row, box_start_col + j]
+        boundary_color = []
+        boundary_color.append(original_image[box_start_row, box_start_col + j, 0])
+        boundary_color.append(original_image[box_start_row, box_start_col + j, 1])
+        boundary_color.append(original_image[box_start_row, box_start_col + j, 2])
         box[0, j] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
@@ -99,7 +111,10 @@ def remove_background(original_image, box_start_row, box_start_col, box_width, b
     # right
     for i in range(box_height):
         pixels_to_check = [(i, box_width - 1)]
-        boundary_color = original_image[i + box_start_row, box_start_col + box_width - 1]
+        boundary_color = []
+        boundary_color.append(original_image[i + box_start_row, box_start_col + box_width - 1, 0])
+        boundary_color.append(original_image[i + box_start_row, box_start_col + box_width - 1, 1])
+        boundary_color.append(original_image[i + box_start_row, box_start_col + box_width - 1, 2])
         box[i, box_width - 1] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
@@ -125,7 +140,10 @@ def remove_background(original_image, box_start_row, box_start_col, box_width, b
     # bottom
     for j in range(box_width):
         pixels_to_check = [(box_height - 1, j)]
-        boundary_color = original_image[box_start_row + box_height - 1, box_start_col + j]
+        boundary_color = []
+        boundary_color.append(original_image[box_start_row + box_height - 1, box_start_col + j, 0])
+        boundary_color.append(original_image[box_start_row + box_height - 1, box_start_col + j, 1])
+        boundary_color.append(original_image[box_start_row + box_height - 1, box_start_col + j, 2])
         box[box_height - 1, j] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)

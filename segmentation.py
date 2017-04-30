@@ -65,10 +65,11 @@ def set_up(text_box, saliency_map):
 
     print("trying to do horizontal projections")
     # horizontal projection = sum of pixel intensities over every column
-    horizontal_proj = numpy.sum(full_box, axis=1)
+    horizontal_proj = numpy.sum(full_box, axis=0)
     # horizontal_proj = [sum(full_box[i]) for i in range(width)]
     min_horiz = min(horizontal_proj)
     max_horiz = max(horizontal_proj)
+    print("len", len(horizontal_proj))
 
     # calculate the segmentation threshold
     vert_seg_thresh = min_vert
@@ -78,13 +79,14 @@ def set_up(text_box, saliency_map):
     #vert_seg_thresh = (min_vert, max_vert)
     #horiz_seg_thresh = (min_horiz, max_horiz)
     new_box = [starting_pixel[0], starting_pixel[1], width, height]
-    vertical(vert_seg_thresh, vert_proj, new_box)
-    for box in BOX_LIST:
+    boxes = vertical(vert_seg_thresh, vert_proj, new_box)
+    print("boxes", boxes)
+    for box in boxes:
         horizontal(horiz_seg_thresh, horizontal_proj, box)
-
 
 def vertical(vert_threshold, vert_proj, box):
     """ loop through all rows of profile to set boundaries """
+    boxes = []
     change = False
     upper_bound = None
     lower_bound = None
@@ -99,14 +101,15 @@ def vertical(vert_threshold, vert_proj, box):
                 # new_box = [box[0], box[1], upper_bound, lower_bound]
                 print(upper_bound, lower_bound)
                 if lower_bound - upper_bound + 1 > 10:
-                    BOX_LIST.append([box[0] + upper_bound, box[1], box[2], lower_bound - upper_bound + 1])
+                    boxes.append([box[0] + upper_bound, box[1], box[2], lower_bound - upper_bound + 1])
                 upper_bound = None
                 lower_bound = None
                 change = True
     if not upper_bound == None:
         print("upper", len(vert_proj))
         if len(vert_proj) - upper_bound > 10:
-            BOX_LIST.append([box[0] + upper_bound, box[1], box[2], len(vert_proj) - upper_bound])
+            boxes.append([box[0] + upper_bound, box[1], box[2], len(vert_proj) - upper_bound])
+    return boxes
 
 def horizontal(horiz_threshold, horizontal_proj, box):
     """ loop through all columns of profile to set boundaries """
@@ -131,14 +134,14 @@ def horizontal(horiz_threshold, horizontal_proj, box):
     if left_bound is not None and right_bound is None:
         right_bound = len(horizontal_proj) - 1
         FINAL_BOXES.append([box[0], box[1] + left_bound, right_bound - left_bound + 1, box[3]])
-    if left_bound is not None and right_bound is not None:
+    elif left_bound is not None and right_bound is not None:
         # new_box = [box[0], box[1], left_bound, right_bound]
         FINAL_BOXES.append([box[0], box[1], box[2], box[3]])
 
 def run_segmentation(initial_boxes, saliency_map):
     for box in initial_boxes:
         set_up(box, saliency_map)
-    return BOX_LIST
+    return FINAL_BOXES
 
 if __name__ == "__main__":
     ret = initial_box()

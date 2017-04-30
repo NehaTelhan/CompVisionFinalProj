@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
         # Remove backgrounds
         # box=(row, col, width, height)
-        bitmap = binarize_bitmap(A, box[0], box[1], box[2], box[3], is_text_inverse)
+        bitmap = remove_background(A, box[0], box[1], box[2], box[3], is_text_inverse)
 
         # Resize to be bigger
         bitmap = skimage.transform.rescale(bitmap, 2)
