@@ -1,12 +1,13 @@
 """ Vertical and Horizontal Segmentation methods """
 import numpy
-from text_extractor import saliency_map
+#from text_extractor import saliency_map
 BOX_LIST = []
+FINAL_BOXES = []
 
 
 def initial_box():
     print("got to initial_box")
-    return saliency_map("demo-image1.jpg")
+    #return saliency_map("demo-image1.jpg")
 
 
 def set_up(text_box, saliency_map):
@@ -14,9 +15,12 @@ def set_up(text_box, saliency_map):
     starting_pixel = [text_box[0], text_box[1]] # should be a tuple, (x, y)
     width = int(text_box[2]) # num columns
     height = int(text_box[3]) # num rows
-    offset = int(height/2) # SHOULD I BE CASTING TO INT HERE IDK
-    starting_pixel[1] = starting_pixel[1] - offset
-    height = height + offset
+    #offset = int(height/2) # SHOULD I BE CASTING TO INT HERE IDK
+    # offset = 10
+    # starting_pixel[1] = starting_pixel[1] - int(offset/2)
+    # starting_pixel[0] = starting_pixel[0] - int(offset/2)
+    # height = height + offset
+    # width = width + offset
 
     # building the full text_box to do the projection on
     # print("width", width)
@@ -25,6 +29,7 @@ def set_up(text_box, saliency_map):
         height = saliency_map.shape[0]
     if width > saliency_map.shape[1]:
         width = saliency_map.shape[1]
+    print(height, width, text_box[3], text_box[2])
     full_box = numpy.empty((height, width))
     for x in range(0, height):
         for y in range(0, width):
@@ -53,9 +58,10 @@ def set_up(text_box, saliency_map):
     print("trying to do vert projections")
     # vertical projection = sum of pixel intensities over every row
     # vert_proj = [sum(full_box[i]) for i in range(height)]
-    vert_proj = numpy.sum(full_box, axis=0)
+    vert_proj = numpy.sum(full_box, axis=1)
     min_vert = min(vert_proj)
     max_vert = max(vert_proj)
+    print("Proj:", vert_proj)
 
     print("trying to do horizontal projections")
     # horizontal projection = sum of pixel intensities over every column
@@ -65,61 +71,74 @@ def set_up(text_box, saliency_map):
     max_horiz = max(horizontal_proj)
 
     # calculate the segmentation threshold
+    vert_seg_thresh = min_vert
+    horiz_seg_thresh = min_horiz
     # WHAT IS A SEGMENTATION THRESHOLD
     # THESE VALUES WILL CHANGE ITS JUST BC I WANNA SET UP LOGIC OF CODE
-    vert_seg_thresh = (min_vert, max_vert)
-    horiz_seg_thresh = (min_horiz, max_horiz)
+    #vert_seg_thresh = (min_vert, max_vert)
+    #horiz_seg_thresh = (min_horiz, max_horiz)
     new_box = [starting_pixel[0], starting_pixel[1], width, height]
-    vertical(vert_seg_thresh, vert_proj, new_box, height)
-    horizontal(horiz_seg_thresh, horizontal_proj, new_box, width)
+    vertical(vert_seg_thresh, vert_proj, new_box)
+    for box in BOX_LIST:
+        horizontal(horiz_seg_thresh, horizontal_proj, box)
 
 
-def vertical(vert_threshold, vert_proj, box, height):
+def vertical(vert_threshold, vert_proj, box):
     """ loop through all rows of profile to set boundaries """
     change = False
     upper_bound = None
     lower_bound = None
     for i in range(0, len(vert_proj)):
         # print("i", i, "height", height)
-        if vert_proj[i] > vert_threshold[0]:
+        if vert_proj[i] > vert_threshold:
             if upper_bound is None:
                 upper_bound = i
         else:
-            if lower_bound is None:
-                lower_bound = i
+            lower_bound = i
             if upper_bound is not None:
                 # new_box = [box[0], box[1], upper_bound, lower_bound]
-                BOX_LIST.append([box[0], box[1], upper_bound, lower_bound])
+                print(upper_bound, lower_bound)
+                if lower_bound - upper_bound + 1 > 10:
+                    BOX_LIST.append([box[0] + upper_bound, box[1], box[2], lower_bound - upper_bound + 1])
                 upper_bound = None
                 lower_bound = None
                 change = True
+    if not upper_bound == None:
+        print("upper", len(vert_proj))
+        if len(vert_proj) - upper_bound > 10:
+            BOX_LIST.append([box[0] + upper_bound, box[1], box[2], len(vert_proj) - upper_bound])
 
-
-def horizontal(horiz_threshold, horizontal_proj, box, width):
+def horizontal(horiz_threshold, horizontal_proj, box):
     """ loop through all columns of profile to set boundaries """
     left_bound = None
     right_bound = None
+    gap = box[3] # height of current text box
     for i in range(0, len(horizontal_proj)):
-        if horizontal_proj[i] > horiz_threshold[0]:
+        if horizontal_proj[i] > horiz_threshold:
             if left_bound is None:
                 left_bound = i
             elif right_bound is not None:
-                if abs(i-right_bound) > horiz_threshold[0]: # wth is large enough?
+                if abs(i-right_bound) > gap: # wth is large enough?
                     # new_box = [box[0], box[1], left_bound, right_bound]
-                    BOX_LIST.append([box[0], box[1], left_bound, right_bound])
+                    FINAL_BOXES.append([box[0], box[1] + left_bound, right_bound - left_bound + 1, box[3]])
                     left_bound = None
                     right_bound = None
                 else:
                     right_bound = None
-
-        elif right_bound is None:
+        else:
             right_bound = i
+
     if left_bound is not None and right_bound is None:
-        right_bound = width
+        right_bound = len(horizontal_proj) - 1
+        FINAL_BOXES.append([box[0], box[1] + left_bound, right_bound - left_bound + 1, box[3]])
     if left_bound is not None and right_bound is not None:
         # new_box = [box[0], box[1], left_bound, right_bound]
-        BOX_LIST.append([box[0], box[1], left_bound, right_bound])
+        FINAL_BOXES.append([box[0], box[1], box[2], box[3]])
 
+def run_segmentation(initial_boxes, saliency_map):
+    for box in initial_boxes:
+        set_up(box, saliency_map)
+    return BOX_LIST
 
 if __name__ == "__main__":
     ret = initial_box()

@@ -5,7 +5,8 @@ import skimage.color, skimage.io
 
 # Input original image in color as float array
 def remove_background(original_image, box_start_row, box_start_col, box_width, box_height, is_text_inverse):
-    threshold_seedfill = 1.4
+    original_image = skimage.img_as_float(original_image)
+    threshold_seedfill = 1.1
 
     height = original_image.shape[0]
     width = original_image.shape[1]
@@ -14,29 +15,33 @@ def remove_background(original_image, box_start_row, box_start_col, box_width, b
     box_end_col = box_start_col + box_width - 1
 
     # Increase text bounding box
-    width_expansion = int(width * 0.1)
-    if box_start_col <= width_expansion:
-        box_start_col = 0
-    else:
-        box_start_col = box_start_col - width_expansion
-    if box_end_col + width_expansion >= width:
-        box_end_col = width - 1
-
-    height_expansion = int(height * 0.2)
-    if box_start_row <= height_expansion:
-        box_start_row = 0
-    else:
-        box_start_row = box_start_row - height_expansion
-    if box_end_row + height_expansion >= height:
-        box_end_row = height - 1
+    # width_expansion = int(box_width * 0.1)
+    # if box_start_col <= width_expansion:
+    #     box_start_col = 0
+    # else:
+    #     box_start_col = box_start_col - width_expansion
+    # if box_end_col + width_expansion >= width:
+    #     box_end_col = width - 1
+    # else:
+    #     box_end_col = box_end_col + width_expansion
+    #
+    # height_expansion = int(box_height * 0.2)
+    # if box_start_row <= height_expansion:
+    #     box_start_row = 0
+    # else:
+    #     box_start_row = box_start_row - height_expansion
+    # if box_end_row + height_expansion >= height:
+    #     box_end_row = height - 1
+    # else:
+    #     box_end_row = box_end_row + height_expansion
 
     # Background color
     color = [1, 1, 1]
     if is_text_inverse:
         color = [0, 0, 0]
 
-    box_height = box_end_row - box_start_row + 1
-    box_width = box_end_col - box_start_col + 1
+    # box_height = box_end_row - box_start_row + 1
+    # box_width = box_end_col - box_start_col + 1
     box = numpy.zeros((box_height, box_width))
 
     # Take pixel on boundary as seed to fill all pixels with background color which do not differ more than threshold
@@ -154,7 +159,7 @@ def binarize_bitmap(original_image, box_start_row, box_start_col, box_width, box
     grayscale = skimage.color.rgb2gray(original_image)
     text_box_bitmap = numpy.zeros((box_height, box_width))
 
-    binarization_threshold = 0.8
+    binarization_threshold = 0.5
     for y in range(box_height):
         for x in range(box_width):
             if is_text_inverse:
@@ -164,7 +169,7 @@ def binarize_bitmap(original_image, box_start_row, box_start_col, box_width, box
                 else:
                     text_box_bitmap[y, x] = 0
             else:
-                if grayscale[y + box_start_row, x + box_start_col] < binarization_threshold:
+                if grayscale[y + box_start_row, x + box_start_col] > binarization_threshold:
                     text_box_bitmap[y, x] = 0
                 else:
                     text_box_bitmap[y, x] = 1

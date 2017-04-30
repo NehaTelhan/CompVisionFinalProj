@@ -12,7 +12,7 @@ def ultimate_ans(max, min):
 
 ''' Sadiyah's output is a list of lists where the inner list has this general outline ----- [ [start_x, start_y, text_cols, text_rows]... ]'''
 
-def color_histogram(list):
+def color_histogram(original_image_path, list):
     '''
     Input is: Runs on single image containing single textbox
         - I NEED TO CALCULATE THE FOLLOWING BASED OFF THE ORIGINAL IMAGE: start coordinate(0,0), height of image, width of image
@@ -20,7 +20,7 @@ def color_histogram(list):
     :return:
         true or false based on whether the intensity in that image happens closer to the 0 color or 256 color
     '''
-    original_image_path = 'NehaRandoImages/file0001625591306.jpg' #Super Autumn Colors
+    #original_image_path = 'NehaRandoImages/file0001625591306.jpg' #Super Autumn Colors
     # original_image_path = 'NehaRandoImages/file0001735386118.jpg' #Super Blue Image
     # original_image_path = 'NehaRandoImages/blackcirclewhitebackground.png'
     original_image = cv2.imread(original_image_path)
@@ -48,9 +48,9 @@ def color_histogram(list):
     for i, col in enumerate(color):
         histrA = cv2.calcHist(center_four_rows, [i], None, [256], [0, 256])
         # cv2.normalize(histrA, histrA, 0, 255, cv2.NORM_MINMAX) #do I even need this line?
-        plt.title('Histogram for Text Boxs 4 Center Rows')
-        plt.plot(histrA, color=col)
-        plt.xlim([0,256])
+        #plt.title('Histogram for Text Boxs 4 Center Rows')
+        #plt.plot(histrA, color=col)
+        #plt.xlim([0,256])
     # plt.show()
 
     '''An array to hold the four outside rows
@@ -71,9 +71,9 @@ def color_histogram(list):
     for i, col in enumerate(color):
         histrB = cv2.calcHist(outer_four_rows, [i], None, [256], [0, 256])
         # cv2.normalize(histrB, histrB, 0, 255, cv2.NORM_MINMAX)#do I even need this line?
-        plt.title('Histogram for Entire Images 2 Upper/Lower Rows')
-        plt.plot(histrB, color=col)
-        plt.xlim([0, 256])
+        #plt.title('Histogram for Entire Images 2 Upper/Lower Rows')
+        #plt.plot(histrB, color=col)
+        #plt.xlim([0, 256])
     # plt.show()
     '''
     max value difference between two histograms is the intensity of the greatest difference in color (intensity = avg od color)

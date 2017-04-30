@@ -1,23 +1,3 @@
-# Split image into various scales
-
-# Split scale images into 20 x 10 windows
-
-# Get 48 x 48 prediction from neural network
-
-# Save inputs in saliency map
-
-# Run segmentation on saliency map
-
-# Run color histogram for text boxes returned from segmentation
-
-# Adjust resolution of text boxes
-
-# Remove backgrounds
-
-# Binarize
-
-# Done!
-
 # Import some libraries
 import numpy, math, sys, glob
 import skimage.io, skimage.transform, pylab, skimage.color
@@ -25,6 +5,10 @@ import scipy.ndimage.filters, scipy.signal, scipy.misc
 
 from window_divider import divide_picture_to_windows, convertWindowToArray
 from train_neural_network import neural_network_predict_filename, neural_network_predict, load_cnn_model
+from segmentation import run_segmentation
+from color_histogram import color_histogram
+from text_bitmap_isolater import remove_background, binarize_bitmap
+from canny_edge import canny_edges
 
 
 def get_gaussian_pyramid(input_image):
@@ -56,19 +40,7 @@ def get_windows(image):
     return images
 
 
-def saliency_map(image_file):
-    # Read image from filename
-    A = skimage.io.imread(image_file)
-    A = skimage.transform.rescale(A, 0.25)
-    pylab.imshow(A)
-    pylab.show()
-
-    # Convert image to float
-    # A = skimage.img_as_float(A)
-
-    # Only for images from dataset
-    # A = skimage.transform.resize(A, (48, 48, 3))
-
+def saliency_map(A):
     # Split image into various scales
     image_list = get_gaussian_pyramid(A)
     print("len image_list", len(image_list))
@@ -204,11 +176,48 @@ def saliency_map(image_file):
     return [boxes, saliency_map]
 
 if __name__ == "__main__":
-    print("please pycharm stop giving me this error")
+    # Read in original image
+    image_file = "demo-image1.jpg"
+    A = skimage.io.imread(image_file)
+    A = skimage.transform.rescale(A, 0.25) # FOR demo-image1 ONLY
+    # edge_image = canny_edges(A)
+    #
+    #
+    # # Saliency map
+    # result = saliency_map(A)
+    # pylab.imshow(result[1], cmap="gray")
+    # pylab.show()
+    # print(result[0])
+    # numpy.save("saliency_boxes.npy", numpy.array(result[0]))
+    results = numpy.load("saliency_boxes.npy")
 
-    result = saliency_map("demo-image1.jpg")
+    # Run segmentation on saliency map
+    # Get edge image for segmentation
+    edge_image = canny_edges(A)
+    boxes = run_segmentation(results, edge_image)
+    print(boxes)
 
-    pylab.imshow(skimage.color.rgb2gray(result[1]))
-    pylab.show()
-    print(result[1])
-    print(result[0])
+    # Process each text box
+    for box in boxes:
+        img = numpy.zeros((box[3], box[2], 3))
+        for i in range(box[3]):
+            for j in range(box[2]):
+                img[i, j] = A[i + box[0], j + box[1]]
+
+        pylab.imshow(img, cmap="gray")
+        pylab.show()
+
+        # Run color histogram for text boxes returned from segmentation
+        is_text_inverse = color_histogram(image_file, box)
+        #is_text_inverse = True
+
+        # Remove backgrounds
+        # box=(row, col, width, height)
+        bitmap = binarize_bitmap(A, box[0], box[1], box[2], box[3], is_text_inverse)
+
+        # Resize to be bigger
+        bitmap = skimage.transform.rescale(bitmap, 2)
+
+        # Done!
+        pylab.imshow(skimage.color.gray2rgb(bitmap))
+        pylab.show()
