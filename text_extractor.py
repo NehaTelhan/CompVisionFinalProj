@@ -9,7 +9,7 @@ from segmentation import run_segmentation
 from color_histogram import color_histogram
 from text_bitmap_isolater import remove_background, binarize_bitmap
 from canny_edge import canny_edges
-
+import timeit
 
 def get_gaussian_pyramid(input_image):
 
@@ -176,6 +176,8 @@ def saliency_map(A):
     return [boxes, saliency_map]
 
 if __name__ == "__main__":
+
+    start_time = timeit.default_timer()
     # Read in original image
     image_file = "demo-image1.jpg"
     A = skimage.io.imread(image_file)
@@ -184,17 +186,15 @@ if __name__ == "__main__":
     #
     #
     # # Saliency map
-    # result = saliency_map(A)
-    # pylab.imshow(result[1], cmap="gray")
-    # pylab.show()
+    results = saliency_map(A)
     # print(result[0])
     # numpy.save("saliency_boxes.npy", numpy.array(result[0]))
-    results = numpy.load("saliency_boxes.npy")
+    # results = numpy.load("saliency_boxes.npy")
 
     # Run segmentation on saliency map
     # Get edge image for segmentation
     edge_image = canny_edges(A)
-    boxes = run_segmentation(results, edge_image)
+    boxes = run_segmentation(results[0], edge_image)
     print(boxes)
 
     # Process each text box
@@ -221,3 +221,5 @@ if __name__ == "__main__":
         # Done!
         pylab.imshow(skimage.color.gray2rgb(bitmap))
         pylab.show()
+
+    print(timeit.default_timer() - start_time)
