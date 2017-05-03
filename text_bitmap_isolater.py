@@ -15,7 +15,7 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
         for i in range(width):
             original_image[j, i] = image[j, i]
 
-    threshold_seedfill = 0.3
+    threshold_seedfill = 0.37
 
     box_end_row = box_start_row + box_height - 1
     box_end_col = box_start_col + box_width - 1
@@ -58,25 +58,26 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
         boundary_color.append(original_image[i + box_start_row, box_start_col, 0])
         boundary_color.append(original_image[i + box_start_row, box_start_col, 1])
         boundary_color.append(original_image[i + box_start_row, box_start_col, 2])
+        box = numpy.zeros((box_height, box_width))
         box[i, 0] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
             if calc_rgb_distance(original_image[pixel[0] + box_start_row, pixel[1] + box_start_col], boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
                 # left
-                if pixel[1] - 1 >= 0 and box[pixel[0], pixel[1] - 1] == 0:
+                if pixel[1] - 1 >= 0 and box[pixel[0], pixel[1] - 1] == 0 and not color_match(original_image[pixel[0] + box_start_row, pixel[1] - 1 + box_start_col], color):
                     pixels_to_check.append((pixel[0], pixel[1] - 1))
                     box[pixel[0], pixel[1] - 1] = 1
                 # top
-                if pixel[0] - 1 >= 0 and box[pixel[0] - 1, pixel[1]] == 0:
+                if pixel[0] - 1 >= 0 and box[pixel[0] - 1, pixel[1]] == 0 and not color_match(original_image[pixel[0] - 1 + box_start_row, pixel[1] + box_start_col], color):
                     pixels_to_check.append((pixel[0] - 1, pixel[1]))
                     box[pixel[0] - 1, pixel[1]] = 1
                 # right
-                if pixel[1] + 1 < box_width and box[pixel[0], pixel[1] + 1] == 0:
+                if pixel[1] + 1 < box_width and box[pixel[0], pixel[1] + 1] == 0 and not color_match(original_image[pixel[0] + box_start_row, pixel[1] + 1 + box_start_col], color):
                     pixels_to_check.append((pixel[0], pixel[1] + 1))
                     box[pixel[0], pixel[1] + 1] = 1
                 # bottom
-                if pixel[0] + 1 < box_height and box[pixel[0] + 1, pixel[1]] == 0:
+                if pixel[0] + 1 < box_height and box[pixel[0] + 1, pixel[1]] == 0 and not color_match(original_image[pixel[0] + 1 + box_start_row, pixel[1] + box_start_col], color):
                     pixels_to_check.append((pixel[0] + 1, pixel[1]))
                     box[pixel[0] + 1, pixel[1]] = 1
     # top
@@ -86,6 +87,7 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
         boundary_color.append(original_image[box_start_row, box_start_col + j, 0])
         boundary_color.append(original_image[box_start_row, box_start_col + j, 1])
         boundary_color.append(original_image[box_start_row, box_start_col + j, 2])
+        box = numpy.zeros((box_height, box_width))
         box[0, j] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
@@ -93,19 +95,19 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
                                  boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
                 # left
-                if pixel[1] - 1 >= 0 and box[pixel[0], pixel[1] - 1] == 0:
+                if pixel[1] - 1 >= 0 and box[pixel[0], pixel[1] - 1] == 0 and not color_match(original_image[pixel[0] + box_start_row, pixel[1] - 1 + box_start_col], color):
                     pixels_to_check.append((pixel[0], pixel[1] - 1))
                     box[pixel[0], pixel[1] - 1] = 1
                 # top
-                if pixel[0] - 1 >= 0 and box[pixel[0] - 1, pixel[1]] == 0:
+                if pixel[0] - 1 >= 0 and box[pixel[0] - 1, pixel[1]] == 0 and not color_match(original_image[pixel[0] - 1 + box_start_row, pixel[1] + box_start_col], color):
                     pixels_to_check.append((pixel[0] - 1, pixel[1]))
                     box[pixel[0] - 1, pixel[1]] = 1
                 # right
-                if pixel[1] + 1 < box_width and box[pixel[0], pixel[1] + 1] == 0:
+                if pixel[1] + 1 < box_width and box[pixel[0], pixel[1] + 1] == 0 and not color_match(original_image[pixel[0] + box_start_row, pixel[1] + 1 + box_start_col], color):
                     pixels_to_check.append((pixel[0], pixel[1] + 1))
                     box[pixel[0], pixel[1] + 1] = 1
                 # bottom
-                if pixel[0] + 1 < box_height and box[pixel[0] + 1, pixel[1]] == 0:
+                if pixel[0] + 1 < box_height and box[pixel[0] + 1, pixel[1]] == 0 and not color_match(original_image[pixel[0] + 1 + box_start_row, pixel[1] + box_start_col], color):
                     pixels_to_check.append((pixel[0] + 1, pixel[1]))
                     box[pixel[0] + 1, pixel[1]] = 1
     # right
@@ -115,6 +117,7 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
         boundary_color.append(original_image[i + box_start_row, box_start_col + box_width - 1, 0])
         boundary_color.append(original_image[i + box_start_row, box_start_col + box_width - 1, 1])
         boundary_color.append(original_image[i + box_start_row, box_start_col + box_width - 1, 2])
+        box = numpy.zeros((box_height, box_width))
         box[i, box_width - 1] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
@@ -122,19 +125,19 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
                                  boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
                 # left
-                if pixel[1] - 1 >= 0 and box[pixel[0], pixel[1] - 1] == 0:
+                if pixel[1] - 1 >= 0 and box[pixel[0], pixel[1] - 1] == 0 and not color_match(original_image[pixel[0] + box_start_row, pixel[1] - 1 + box_start_col], color):
                     pixels_to_check.append((pixel[0], pixel[1] - 1))
                     box[pixel[0], pixel[1] - 1] = 1
                 # top
-                if pixel[0] - 1 >= 0 and box[pixel[0] - 1, pixel[1]] == 0:
+                if pixel[0] - 1 >= 0 and box[pixel[0] - 1, pixel[1]] == 0 and not color_match(original_image[pixel[0] - 1 + box_start_row, pixel[1] + box_start_col], color):
                     pixels_to_check.append((pixel[0] - 1, pixel[1]))
                     box[pixel[0] - 1, pixel[1]] = 1
                 # right
-                if pixel[1] + 1 < box_width and box[pixel[0], pixel[1] + 1] == 0:
+                if pixel[1] + 1 < box_width and box[pixel[0], pixel[1] + 1] == 0 and not color_match(original_image[pixel[0] + box_start_row, pixel[1] + 1 + box_start_col], color):
                     pixels_to_check.append((pixel[0], pixel[1] + 1))
                     box[pixel[0], pixel[1] + 1] = 1
                 # bottom
-                if pixel[0] + 1 < box_height and box[pixel[0] + 1, pixel[1]] == 0:
+                if pixel[0] + 1 < box_height and box[pixel[0] + 1, pixel[1]] == 0 and not color_match(original_image[pixel[0] + 1 + box_start_row, pixel[1] + box_start_col], color):
                     pixels_to_check.append((pixel[0] + 1, pixel[1]))
                     box[pixel[0] + 1, pixel[1]] = 1
     # bottom
@@ -144,6 +147,7 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
         boundary_color.append(original_image[box_start_row + box_height - 1, box_start_col + j, 0])
         boundary_color.append(original_image[box_start_row + box_height - 1, box_start_col + j, 1])
         boundary_color.append(original_image[box_start_row + box_height - 1, box_start_col + j, 2])
+        box = numpy.zeros((box_height, box_width))
         box[box_height - 1, j] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
@@ -151,24 +155,27 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
                                  boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
                 # left
-                if pixel[1] - 1 >= 0 and box[pixel[0], pixel[1] - 1] == 0:
+                if pixel[1] - 1 >= 0 and box[pixel[0], pixel[1] - 1] == 0 and not color_match(original_image[pixel[0] + box_start_row, pixel[1] - 1 + box_start_col], color):
                     pixels_to_check.append((pixel[0], pixel[1] - 1))
                     box[pixel[0], pixel[1] - 1] = 1
                 # top
-                if pixel[0] - 1 >= 0 and box[pixel[0] - 1, pixel[1]] == 0:
+                if pixel[0] - 1 >= 0 and box[pixel[0] - 1, pixel[1]] == 0 and not color_match(original_image[pixel[0] - 1 + box_start_row, pixel[1] + box_start_col], color):
                     pixels_to_check.append((pixel[0] - 1, pixel[1]))
                     box[pixel[0] - 1, pixel[1]] = 1
                 # right
-                if pixel[1] + 1 < box_width and box[pixel[0], pixel[1] + 1] == 0:
+                if pixel[1] + 1 < box_width and box[pixel[0], pixel[1] + 1] == 0 and not color_match(original_image[pixel[0] + box_start_row, pixel[1] + 1 + box_start_col], color):
                     pixels_to_check.append((pixel[0], pixel[1] + 1))
                     box[pixel[0], pixel[1] + 1] = 1
                 # bottom
-                if pixel[0] + 1 < box_height and box[pixel[0] + 1, pixel[1]] == 0:
+                if pixel[0] + 1 < box_height and box[pixel[0] + 1, pixel[1]] == 0 and not color_match(original_image[pixel[0] + 1 + box_start_row, pixel[1] + box_start_col], color):
                     pixels_to_check.append((pixel[0] + 1, pixel[1]))
                     box[pixel[0] + 1, pixel[1]] = 1
 
     # potentially add algorithm for eight-connect to delete more regions
     return binarize_bitmap(original_image, box_start_row, box_start_col, box_width, box_height, is_text_inverse)
+
+def color_match(color1, color2):
+    return color1[0] == color2[0] and color1[1] == color2[1] and color1[2] == color2[2];
 
 def calc_rgb_distance(color1, color2):
     return math.sqrt((color1[0] - color2[0]) * (color1[0] - color2[0]) + (color1[1] - color2[1]) * (color1[1] - color2[1]) + (color1[2] - color2[2]) * (color1[2] - color2[2]))
