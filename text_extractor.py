@@ -184,7 +184,7 @@ if __name__ == "__main__":
     #
     #
     # # Saliency map
-    # result = saliency_map(A)
+    #result = saliency_map(A)
     # pylab.imshow(result[1], cmap="gray")
     # pylab.show()
     # print(result[0])
