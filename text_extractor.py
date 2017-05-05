@@ -217,12 +217,12 @@ if __name__ == "__main__":
 
     start_time = timeit.default_timer()
     # Read in original image
-    image_file = "demo-image1.jpg"
-    # image_file = "training_set/13.jpg"
+    #image_file = "demo-image1.jpg"
+    image_file = "training_set/3.jpg"
 
     A = skimage.io.imread(image_file)
 
-    A = skimage.transform.rescale(A, 0.25) # FOR demo-image1 ONLY
+    #A = skimage.transform.rescale(A, 0.25) # FOR demo-image1 ONLY
     # edge_image = canny_edges(A)
     #
     #
@@ -234,9 +234,9 @@ if __name__ == "__main__":
     #pylab.imshow(edge_image)
     #pylab.show()
 
-    #results = saliency_map(A)
+    results = saliency_map(A)
     # print(result[0])
-    results = numpy.ndarray.tolist(numpy.load("saliency_boxes.npy"))
+    #results = numpy.ndarray.tolist(numpy.load("saliency_boxes.npy"))
     #pylab.imshow(results[1], cmap="gray")
     #pylab.show()
 
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     #exit()
 
 
-    boxes = run_segmentation(combine_boxes(results, A.shape[0], A.shape[1]), edge_image)
+    boxes = run_segmentation(combine_boxes(results[0], A.shape[0], A.shape[1]), edge_image)
     # numpy.save("saliency_boxes1.npy", numpy.array(boxes))
     print(boxes)
 

@@ -82,12 +82,9 @@ def color_histogram(original_image_path, list):
     # print("HistrA", histrA, len(histrA))
     # print("HistrB", histrB, len(histrB))
     diff_array = []
-    for i in range(len(histrA)):
-        diff = histrA[i] - histrB[i]
+    for a, b in histrA, histrB:
+        diff = abs(a - b)
         diff_array.append(diff)
-    # for a, b in histrA, histrB:
-    #     diff = abs(a - b)
-    #     diff_array.append(diff)
 
     print(diff_array)
 
