@@ -1,5 +1,4 @@
 import numpy
-import scipy.misc
 
 # Expected input: Image from gaussian pyramid
 def divide_picture_to_windows(picture):

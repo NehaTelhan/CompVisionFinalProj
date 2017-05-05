@@ -1,5 +1,4 @@
 import json
-import numpy
 
 def read_in_classifications_for_training(filename):
     with open(filename) as file:
@@ -37,15 +36,6 @@ def retrieve_classifications(filename, imgname):
     else:
         num = 1
     return num
-
-def convert_zero_classifications_to_one(classifications):
-    fixed_classifications = numpy.zeros(len(classifications))
-    for i in classifications:
-        if i == 0:
-            fixed_classifications[i] = 1
-        else:
-            fixed_classifications[i] = -1
-    return fixed_classifications
 
 if __name__ == "__main__":
     #read_in_classifications_for_training('train_unbalance.txt')
