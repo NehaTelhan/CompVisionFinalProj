@@ -25,7 +25,7 @@ def retrieve_classifications(filename, imgname):
     classification_list = classification_list.split(",")
     imgname = imgname.split("_")
     imgnum = imgname[1].split(".")
-    if filename == "val_unbalance.txt":
+    if int(imgnum[0]) >= 680674:
         imgnum = int(imgnum[0]) - 680674
         classification = classification_list[imgnum]
     else:

@@ -5,16 +5,38 @@ from keras.optimizers import RMSprop
 from keras.initializers import Constant
 from keras import optimizers
 from keras.applications import VGG16
-import skimage.io, skimage.transform
+import skimage.io, skimage.transform, skimage
 import numpy
-import window_divider
 import read_in_classifications
 import random
 import pylab
+import keras
+import sklearn.metrics
 
 from keras.applications import VGG16
 from keras.preprocessing.image import ImageDataGenerator
 
+def confusion_matrix(training_images, training_classifications):
+    model = load_model("modelcnn7.h5")
+    model.compile(loss='binary_crossentropy',
+                  optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
+                  metrics=['accuracy'])
+
+    predictions = model.predict_classes(training_images, verbose=1)
+    
+    matrix = sklearn.metrics.confusion_matrix(training_classifications, predictions)
+    
+    matrix = matrix.astype(float)
+    for i in range(matrix.shape[0]):
+        sum = 0.0
+        for j in range(matrix.shape[1]):
+            sum = sum + matrix[i, j]
+        for j in range(matrix.shape[1]):
+            matrix[i, j] = matrix[i, j] / sum
+
+    numpy.save("matrix.npy", matrix)
+    print(matrix)
+    return matrix
 
 def read_image_list():
     with open("demo-finished.txt", "r") as images_list:
@@ -72,13 +94,13 @@ def seperate_data(images, classifications):
 def train_network(training_images, training_classifications, validation_images, validation_classifications):
     # TODO: Decide on how many images per batch, how many epochs, and number of samples
     batch_size = 16
-    epochs = 1
+    epochs = 10
 
     num_classes = 2
 
     # Convert class vectors to binary class matrices
     train_classifications = keras.utils.to_categorical(training_classifications, num_classes)
-    validation_classifications = keras.utils.to_categorical(validation_classifications, num_classes)
+    # validation_classifications = keras.utils.to_categorical(validation_classifications, num_classes)
 
     # base_model = VGG16(weights='imagenet', include_top=False, input_shape=(48, 48, 3))
     # Add an additional MLP model at the "top" (end) of the network
@@ -142,6 +164,33 @@ def train_network(training_images, training_classifications, validation_images, 
                     use_bias=True,
                     bias_initializer='zeros'))
 
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=(3,3),
+                     activation='relu',
+                     input_shape=(48, 48, 3)))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.25))
+    model.add(Dense(2, activation='softmax'))
+
+    model = Sequential()
+    model.add(Conv2D(96, kernel_size=(5,5),
+                     activation='relu',
+                     input_shape=(48, 48, 3),
+                     kernel_initializer='glorot_normal'))
+    model.add(Conv2D(256, (3,3), activation='relu', kernel_initializer='glorot_normal'))
+    model.add(MaxPooling2D(pool_size=(3, 3)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(4096, activation='relu', kernel_initializer='glorot_normal'))
+    model.add(Dropout(0.5))
+    model.add(Dense(2, activation='softmax'))
+
+    #model = load_model("modelcnn6.h5")
+
     # model = Sequential()
     # model.add(Conv2D(32, kernel_size=(3, 3),
     #                  activation='relu',
@@ -155,18 +204,22 @@ def train_network(training_images, training_classifications, validation_images, 
     # model.add(Dense(1, activation='tanh'))
 
     # Compile the model with a SGD/momentum optimizer and a slow learning rate.
-    model.compile(loss='mean_squared_error',
+    model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
                   metrics=['accuracy'])
 
-    model.fit(training_images, training_classifications,
+    model.fit(training_images, train_classifications,
               batch_size=batch_size,
               epochs=epochs,
               verbose=1,
-              validation_data=(validation_images, validation_classifications),
-              class_weight={0: 1, 1: 100.})
+              validation_split=0.2,
+              shuffle=True,
+              class_weight={0: 1, 1: 1}
+    )
 
-    score = model.evaluate(validation_images, validation_classifications, verbose=0)
+    model.save("modelcnn200.h5")
+
+    score = model.evaluate(training_images, train_classifications, verbose=1)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
@@ -175,41 +228,35 @@ def train_network(training_images, training_classifications, validation_images, 
     # with open("model.json", "w") as json_file:
     #     json_file.write(model_json)
     # model.save_weights("model-v2.h5")
-    model.save("model.h5")
 
     return model
 
-def load_cnn_model(modelFileName):
-    model = load_model(modelFileName)
 
-    model.compile(loss="binary_crossentropy",
-                  optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
-                  metrics=['accuracy'])
-
-    return model
-
-def neural_network_predict(image, model):
+def neural_network_predict(image):
     image_input = numpy.zeros((1, 48, 48, 3))
     image_input[0] = image
 
-    return model.predict(image_input)[0][1]
+    model = load_model("model.h5")
+
+    model.compile(loss="mean_squared_error",
+                  optimizer=RMSprop(),
+                  metrics=['accuracy'])
+    return model.predict(image_input)[0]
 
 
 def neural_network_predict_filename(filename):
 
     A = skimage.io.imread(filename)
     A = skimage.img_as_float(A)
-    A = skimage.transform.resize(A, (224, 224, 3))
-    pylab.imshow(A)
-    pylab.show()
+    A = skimage.transform.resize(A, (48, 48, 3))
 
-    image_input = numpy.zeros((1, 224, 224, 3))
+    image_input = numpy.zeros((1, 48, 48, 3))
     image_input[0] = A
 
-    base_model = VGG16(weights='imagenet', include_top=True)
+    base_model = load_model("modelcnn.h5")
 
-    base_model.compile(loss='mean_squared_error',
-                  optimizer=RMSprop(),
+    base_model.compile(loss='binary_crossentropy',
+                  optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
                   metrics=['accuracy'])
 
     return base_model.predict(image_input)
@@ -225,56 +272,98 @@ def read_in_data(training_images_filename, training_classifications_filename, va
     val_text_images = 0
     train_non_images = 0
     val_non_images = 0
-    for i in range(20000):
-        filename = "txt_" + str(i) + ".jpg"
+    
+    for i in range(1, 86):
+        image = skimage.transform.resize(skimage.io.imread("Vision/char/" + str(62) + "/" + str(6100 + i) + ".jpg"), (48, 48, 3))
+        classification = 1
+        #train_text_images = train_text_images + 1
+        #training_classifications.append(classification)
+        #training_images.append(image)
+        print("char/" + str(62) + "/" + str(6100 + i))
+
+    count = 1
+    for i in range(1, 62):
+        for j in range(100):
+            image = skimage.transform.resize(skimage.io.imread("Vision/char/" + str(i) + "/" + str(count) + ".jpg"), (48, 48, 3))
+            classification = 1
+            #train_text_images = train_text_images + 1
+            #training_classifications.append(classification)
+            #training_images.append(image)
+            count = count + 1
+            print("char/" + str(i) + "/" + str(count - 1))
+
+
+    for i in range(0, 300000): # 300000 (cnn), 200000 (float), 100000 (mod)
+        
         try:
-            image = skimage.transform.resize(skimage.io.imread("../training/" + filename), (48, 48, 3))
-            if i >= 680674:
-                classification = read_in_classifications.retrieve_classifications("classifications_val_unbalance.txt", filename)
-            else:
-                classification = read_in_classifications.retrieve_classifications("classifications_train_unbalance.txt", filename)
+            filename = "Vision/training/txt_" + str(i) + ".jpg"
+            image = skimage.img_as_float(skimage.transform.resize(skimage.io.imread(filename), (48, 48, 3)))
+        except:
+            continue
+            try:
+                filename = "Vision/testing/txt_" + str(i) + ".jpg"
+                image = skimage.transform.resize(skimage.io.imread(filename), (48, 48, 3))
+            except:
+                continue
 
-            if classification == 1:
-                print(filename, classification)
-                train_text_images += 1
-                training_classifications.append(classification)
-                training_images.append(image)
-            elif train_non_images < train_text_images:
-                print(filename, classification)
-                train_non_images += 1
-                training_classifications.append(classification)
-                training_images.append(image)
+        if i >= 680874:
+            classification = read_in_classifications.retrieve_classifications("Vision/classifications_val_unbalance.txt", filename)
+        else:
+            classification = read_in_classifications.retrieve_classifications("Vision/classifications_train_unbalance.txt", filename)
 
-        except FileNotFoundError:
-            image = skimage.transform.resize(skimage.io.imread("../testing/" + filename), (48, 48, 3))
-            if i >= 680674:
-                classification = read_in_classifications.retrieve_classifications("classifications_val_unbalance.txt", filename)
-            else:
-                classification = read_in_classifications.retrieve_classifications("classifications_train_unbalance.txt", filename)
+        if classification == 1:
+            print(filename, classification)
+            train_text_images += 1
+            training_classifications.append(classification)
+            training_images.append(image)
+        elif train_non_images < train_text_images:
+            print(filename, classification)
+            train_non_images += 1
+            training_classifications.append(classification)
+            training_images.append(image)
 
-            if classification == 1:
-                print(filename, classification)
-                val_text_images += 1
-                validation_classifications.append(classification)
-                validation_images.append(image)
-            elif val_non_images < val_text_images:
-                print(filename, classification)
-                val_non_images += 1
-                validation_classifications.append(classification)
-                validation_images.append(image)
+    count = 1
+    for i in range(1, 62):
+        for j in range(100):
+            image = skimage.transform.resize(skimage.io.imread("Vision/char/" + str(i) + "/" + str(count) + ".jpg"), (48, 48, 3))
+            classification = 1
+            #training_classifications.append(classification)
+            #training_images.append(image)
+            count = count + 1
+            print("char/" + str(i) + "/" + str(count - 1))
 
     return numpy.array(training_images), numpy.array(training_classifications), numpy.array(validation_images), numpy.array(validation_classifications)
 
 if __name__ == "__main__":
     #images, classifications = read_image_list()
 
-    A = skimage.transform.resize(skimage.io.imread("txt_1316.jpg"), (48, 48, 3))
-    print(neural_network_predict(A, "modelcnn.h5"))
-
-    #training_images, training_classifications, validation_images, validation_classifications = read_in_data("training_data/training_images3.npy", "training_data/training_classifications3.npy", "training_data/validation_images3.npy", "training_data/validation_classifications3.npy")
+    # training_images, training_classifications, validation_images, validation_classifications = read_in_data("training_data/training_images3.npy", "training_data/training_classifications3.npy", "training_data/validation_images3.npy", "training_data/validation_classifications3.npy")
 
     #print(training_images.shape, training_classifications.shape, validation_images.shape, validation_classifications.shape)
 
-    #train_network(training_images, training_classifications, validation_images, validation_classifications)
+    #numpy.save("Vision/images_0_3.npy", training_images)
+    #numpy.save("Vision/classifications_0_3.npy", training_classifications)
+
+    
+    training_images = numpy.load("Vision/images_0_3.npy")
+    training_classifications = numpy.load("Vision/classifications_0_3.npy")
+    
+    training_images = numpy.append(training_images, numpy.load("Vision/images_3_35.npy"), axis=0)
+    training_classifications = numpy.append(training_classifications, numpy.load("Vision/classifications_3_35.npy"))
+
+    training_images = numpy.append(training_images, numpy.load("Vision/images_35_38.npy"), axis=0)
+    training_classifications = numpy.append(training_classifications, numpy.load("Vision/classifications_35_38.npy"))
+
+    training_images = numpy.append(training_images, numpy.load("Vision/images_5_10.npy"), axis=0)
+    training_classifications = numpy.append(training_classifications, numpy.load("Vision/classifications_5_10.npy"))
+
+    #train_network(training_images, training_classifications, [], [])
+
+    confusion_matrix(training_images, training_classifications)
+
+    #print(neural_network_predict_filename("Vision/char/1/1.jpg"))
+    #print(neural_network_predict_filename("Vision/txt_591.jpg"))
+    #print(neural_network_predict_filename("Vision/txt_1316.jpg"))
+    #print(neural_network_predict_filename("Vision/txt_1375.jpg"))
 
     pass
