@@ -83,20 +83,20 @@ def set_up(text_box, saliency_map):
     #vert_seg_thresh = (min_vert, max_vert)
     #horiz_seg_thresh = (min_horiz, max_horiz)
     for box in boxes:
-        full_box = projection_set_up([box[0], box[1]], box[3], box[2], saliency_map)
+        # full_box = projection_set_up([box[0], box[1]], box[3], box[2], saliency_map)
         #horizontal_proj = numpy.sum(full_box, axis=0)
         horizontal_proj = numpy.zeros(box[2])
         for j in range(box[2]):
             sum = 0
             for i in range(box[3]):
-                sum += saliency_map[i, j]
+                sum += saliency_map[i + box[0], j + box[1]]
             horizontal_proj[j] = sum
 
         print(horizontal_proj)
         min_horiz = min(horizontal_proj)
         max_horiz = max(horizontal_proj)
         print("len", len(horizontal_proj))
-        horiz_seg_thresh = min_horiz + int((max_horiz - min_horiz) * 0.025)
+        horiz_seg_thresh = min_horiz
         print(horiz_seg_thresh)
 
         horizontal(horiz_seg_thresh, horizontal_proj, box)
@@ -132,7 +132,7 @@ def horizontal(horiz_threshold, horizontal_proj, box):
     """ loop through all columns of profile to set boundaries """
     left_bound = None
     right_bound = None
-    gap = box[3] / 20.0 # height of current text box
+    gap = box[3] / 10.0 # height of current text box
     for i in range(0, len(horizontal_proj)):
         if horizontal_proj[i] > horiz_threshold:
             if left_bound is None:
