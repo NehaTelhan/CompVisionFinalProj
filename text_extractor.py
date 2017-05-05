@@ -221,7 +221,7 @@ if __name__ == "__main__":
     start_time = timeit.default_timer()
     # Read in original image
     # image_file = "demo-image1.jpg"
-    image_file = "training_set/20.jpg"
+    image_file = "training_set/22.jpg"
 
     A = skimage.io.imread(image_file)
 
