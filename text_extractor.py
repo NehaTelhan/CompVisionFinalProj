@@ -89,8 +89,8 @@ def saliency_map(A):
         # if b_count == 1:
         #     break
 
-    pylab.imshow(saliency_map, cmap='gray')
-    pylab.show()
+    #pylab.imshow(saliency_map, cmap='gray')
+    #pylab.show()
 
     # Extract initial text boxes
     saliency_checked = numpy.zeros(saliency_map.shape)
@@ -175,29 +175,81 @@ def saliency_map(A):
                     boxes.append(box)
     return [boxes, saliency_map]
 
+def combine_boxes(boxes, original_height, original_width):
+    for j in range(len(boxes)):
+        box = boxes.pop(0)
+        boxes_to_remove = []
+        for b in boxes:
+            shared = share_pixels(box, b, original_height, original_width)
+            if shared:
+                highest_row = box[0]
+                highest_col = box[1]
+                lowest_row = box[1] + box[2]
+                lowest_col = box[0] + box[3]
+                if b[0] < highest_row:
+                    highest_row = b[0]
+                if b[1] < highest_col:
+                    highest_col = b[1]
+                if b[0] + b[3] > lowest_row:
+                    lowest_row = b[0] + b[3]
+                if b[1] + b[2] > lowest_col:
+                    lowest_col = b[1] + b[2]
+                box = [highest_row, highest_col, lowest_col - highest_col, lowest_row - highest_row]
+                boxes_to_remove.append(b)
+        for b in boxes_to_remove:
+            boxes.remove(b)
+        boxes.append(box)
+    return boxes
+
+def share_pixels(box1, box2, original_height, original_width):
+    img = numpy.zeros((original_height, original_width))
+    for i in range(box1[0], box1[0] + box1[3]):
+        for j in range(box1[1], box1[1] + box1[2]):
+            img[i, j] = 1
+    shared = False
+    for i in range(box2[0], box2[0] + box2[3]):
+        for j in range(box2[1], box2[1] + box2[2]):
+            if img[i, j] == 1:
+                shared = True
+    return shared
+
 if __name__ == "__main__":
 
     start_time = timeit.default_timer()
     # Read in original image
-    image_file = "demo-image1.jpg"
-    # image_file = "training_set/13.jpg"
+    #image_file = "demo-image1.jpg"
+    image_file = "training_set/3.jpg"
 
     A = skimage.io.imread(image_file)
-    A = skimage.transform.rescale(A, 0.25) # FOR demo-image1 ONLY
+
+    #A = skimage.transform.rescale(A, 0.25) # FOR demo-image1 ONLY
     # edge_image = canny_edges(A)
     #
     #
     # # Saliency map
+    #result = saliency_map(A)
+    # pylab.imshow(result[1], cmap="gray")
+    # pylab.show()
+    edge_image = canny_edges(A)
+    #pylab.imshow(edge_image)
+    #pylab.show()
+
     results = saliency_map(A)
     # print(result[0])
-    # numpy.save("saliency_boxes.npy", numpy.array(result[0]))
-    # results = numpy.load("saliency_boxes.npy")
+    #results = numpy.ndarray.tolist(numpy.load("saliency_boxes.npy"))
+    #pylab.imshow(results[1], cmap="gray")
+    #pylab.show()
 
     # Run segmentation on saliency map
     # Get edge image for segmentation
-    edge_image = canny_edges(A)
-    boxes = run_segmentation(results[0], edge_image)
+    #print(results[0])
+    #exit()
+
+
+    boxes = run_segmentation(combine_boxes(results[0], A.shape[0], A.shape[1]), edge_image)
+    # numpy.save("saliency_boxes1.npy", numpy.array(boxes))
     print(boxes)
+
 
     # Process each text box
     for box in boxes:
@@ -205,7 +257,7 @@ if __name__ == "__main__":
         for i in range(box[3]):
             for j in range(box[2]):
                 img[i, j] = A[i + box[0], j + box[1]]
-
+        print("Sadiyah, pay attention and save one of these. Love, Your Past Self")
         pylab.imshow(img, cmap="gray")
         pylab.show()
 
