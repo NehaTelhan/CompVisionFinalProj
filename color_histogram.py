@@ -63,11 +63,11 @@ def color_histogram(original_image_path, list):
     '''Loops through the two entire rows from edge to edge of picture
     two rows above...'''
     #Row right above textbox and first row of the textbox
-    for i in range((y_pix + 15), (y_pix)):
+    for i in range((y_pix - 1), (y_pix + 1)):
         outer_four_rows.append(original_image[i])
 
     #one row below textbox and the last row of textbox....
-    for i in range((y_pix + box_height - 15), y_pix+box_height):
+    for i in range((y_pix + box_height - 1), y_pix+box_height+1):
         outer_four_rows.append(original_image[i])
 
     #Make the color histogram for the whole images two upper + two lower rows show the colors (BGR) as lines
