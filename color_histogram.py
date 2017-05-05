@@ -20,7 +20,7 @@ def color_histogram(original_image_path, list):
     :return:
         true or false based on whether the intensity in that image happens closer to the 0 color or 256 color
     '''
-    #original_image_path = 'NehaRandoImages/file0001625591306.jpg' #Super Autumn Colors
+    # original_image_path = 'NehaRandoImages/file0001625591306.jpg' #Super Autumn Colors
     # original_image_path = 'NehaRandoImages/file0001735386118.jpg' #Super Blue Image
     # original_image_path = 'NehaRandoImages/blackcirclewhitebackground.png'
     original_image = cv2.imread(original_image_path)
@@ -48,10 +48,12 @@ def color_histogram(original_image_path, list):
     for i, col in enumerate(color):
         histrA = cv2.calcHist(center_four_rows, [i], None, [256], [0, 256])
         # cv2.normalize(histrA, histrA, 0, 255, cv2.NORM_MINMAX) #do I even need this line?
-        #plt.title('Histogram for Text Boxs 4 Center Rows')
-        #plt.plot(histrA, color=col)
-        #plt.xlim([0,256])
-    # plt.show()
+        plt.title('Histogram for Text Boxs 4 Center Rows')
+        plt.plot(histrA, color=col)
+        plt.xlim([0,256])
+        plt.ylabel("# of pixels")
+        plt.xlabel("bins")
+    plt.show()
 
     '''An array to hold the four outside rows
     two rows from the top of the outside of the textbox
@@ -60,21 +62,24 @@ def color_histogram(original_image_path, list):
 
     '''Loops through the two entire rows from edge to edge of picture
     two rows above...'''
-    for i in range((y_pix - 2), y_pix):
+    #Row right above textbox and first row of the textbox
+    for i in range((y_pix - 1), (y_pix+1)):
         outer_four_rows.append(original_image[i])
 
-    #two rows below....
-    for i in range((y_pix + box_height), y_pix+box_height+2):
+    #one row below textbox and the last row of textbox....
+    for i in range((y_pix + box_height-1), y_pix+box_height+1):
         outer_four_rows.append(original_image[i])
 
     #Make the color histogram for the whole images two upper + two lower rows show the colors (BGR) as lines
     for i, col in enumerate(color):
         histrB = cv2.calcHist(outer_four_rows, [i], None, [256], [0, 256])
         # cv2.normalize(histrB, histrB, 0, 255, cv2.NORM_MINMAX)#do I even need this line?
-        #plt.title('Histogram for Entire Images 2 Upper/Lower Rows')
-        #plt.plot(histrB, color=col)
-        #plt.xlim([0, 256])
-    # plt.show()
+        plt.title('Histogram for Entire Images 2 Upper/Lower Rows')
+        plt.plot(histrB, color=col)
+        plt.xlim([0, 256])
+        plt.ylabel("# of pixels")
+        plt.xlabel("bins")
+    plt.show()
     '''
     max value difference between two histograms is the intensity of the greatest difference in color (intensity = avg od color)
     256 slots = intensities number inside slot = number of pixels that are of that intensity
@@ -100,13 +105,13 @@ def color_histogram(original_image_path, list):
 
 
 if __name__ == "__main__":
-    # Start_xPixel = 0; Start_yPixel=0; textbox_width=10; textbox_height=25
-    color_histogram([0,0,10,25])
 
-    # Start_xPixel = 20; Start_yPixel=34; textbox_width=40; textbox_height=120
-    color_histogram([20,34,40,120])
+    # image = cv2.imread("NehaRandoImages/textonly.png")
+    # print("1", image.shape)
+    #
+    image2 = cv2.imread("NehaRandoImage/outside.png")
+    print("2", image2.shape)
+    #
+    # color_histogram("NehaRandoImages/textonly.png", [0, 0, image.shape[1]-1, image.shape[0]-1 ])
+    color_histogram("NehaRandoImages/outside.png", [0, 0, image2.shape[1]-1, image2.shape[0]-1 ])
 
-    test = [[4,8,12,46], [8, 90, 12, 45], [67, 32, 45, 120], [129, 453, 210, 56], [600, 600, 124, 125], [0, 0, 41, 44], [0, 0, 12, 25]]
-
-    for list in test:
-        color_histogram(list)
