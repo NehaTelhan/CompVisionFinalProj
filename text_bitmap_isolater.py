@@ -21,7 +21,7 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
     box_end_col = box_start_col + box_width - 1
 
     # Increase text bounding box
-    width_expansion = int(box_width * 0.2)
+    width_expansion = int(box_width * 0.13)
     if box_start_col <= width_expansion:
         box_start_col = 0
     else:

@@ -1,13 +1,21 @@
 from keras.layers import Dense, Flatten
 from keras.models import Sequential, load_model
 from keras.layers import Conv2D, MaxPooling2D, Dropout
-from keras.optimizers import RMSprop
 from keras import optimizers
 import skimage.io, skimage.transform, skimage
 import numpy
 import read_in_classifications
 import keras
 import sklearn.metrics
+
+def load_cnn_model(modelFileName):
+    model = load_model(modelFileName)
+
+    model.compile(loss="binary_crossentropy",
+                  optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
+                  metrics=['accuracy'])
+
+    return model
 
 def confusion_matrix(training_images, training_classifications):
     model = load_model("modelcnn7.h5")
@@ -33,7 +41,6 @@ def confusion_matrix(training_images, training_classifications):
 
 # Training and validation images should be output consolidated from window_divider
 def train_network(training_images, training_classifications, validation_images, validation_classifications):
-    # TODO: Decide on how many images per batch, how many epochs, and number of samples
     batch_size = 16
     epochs = 10
 
@@ -78,16 +85,11 @@ def train_network(training_images, training_classifications, validation_images, 
 
     return model
 
-def neural_network_predict(image):
+def neural_network_predict(image, model):
     image_input = numpy.zeros((1, 48, 48, 3))
     image_input[0] = image
 
-    model = load_model("model.h5")
-
-    model.compile(loss="mean_squared_error",
-                  optimizer=RMSprop(),
-                  metrics=['accuracy'])
-    return model.predict(image_input)[0]
+    return model.predict(image_input)[0][1]
 
 def neural_network_predict_filename(filename):
 
