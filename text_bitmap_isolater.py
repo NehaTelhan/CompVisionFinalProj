@@ -15,7 +15,7 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
         for i in range(width):
             original_image[j, i] = image[j, i]
 
-    threshold_seedfill = 0.37
+    threshold_seedfill = 0.32
 
     box_end_row = box_start_row + box_height - 1
     box_end_col = box_start_col + box_width - 1
@@ -55,14 +55,14 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
     for i in range(box_height):
         pixels_to_check = [(i, 0)]
         boundary_color = []
-        boundary_color.append(original_image[i + box_start_row, box_start_col, 0])
-        boundary_color.append(original_image[i + box_start_row, box_start_col, 1])
-        boundary_color.append(original_image[i + box_start_row, box_start_col, 2])
+        boundary_color.append(image[i + box_start_row, box_start_col, 0])
+        boundary_color.append(image[i + box_start_row, box_start_col, 1])
+        boundary_color.append(image[i + box_start_row, box_start_col, 2])
         box = numpy.zeros((box_height, box_width))
         box[i, 0] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
-            if calc_rgb_distance(original_image[pixel[0] + box_start_row, pixel[1] + box_start_col], boundary_color) < threshold_seedfill:
+            if calc_rgb_distance(image[pixel[0] + box_start_row, pixel[1] + box_start_col], boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
                 # left
                 if pixel[1] - 1 >= 0 and box[pixel[0], pixel[1] - 1] == 0 and not color_match(original_image[pixel[0] + box_start_row, pixel[1] - 1 + box_start_col], color):
@@ -84,14 +84,14 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
     for j in range(box_width):
         pixels_to_check = [(0, j)]
         boundary_color = []
-        boundary_color.append(original_image[box_start_row, box_start_col + j, 0])
-        boundary_color.append(original_image[box_start_row, box_start_col + j, 1])
-        boundary_color.append(original_image[box_start_row, box_start_col + j, 2])
+        boundary_color.append(image[box_start_row, box_start_col + j, 0])
+        boundary_color.append(image[box_start_row, box_start_col + j, 1])
+        boundary_color.append(image[box_start_row, box_start_col + j, 2])
         box = numpy.zeros((box_height, box_width))
         box[0, j] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
-            if calc_rgb_distance(original_image[pixel[0] + box_start_row, pixel[1] + box_start_col],
+            if calc_rgb_distance(image[pixel[0] + box_start_row, pixel[1] + box_start_col],
                                  boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
                 # left
@@ -114,14 +114,14 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
     for i in range(box_height):
         pixels_to_check = [(i, box_width - 1)]
         boundary_color = []
-        boundary_color.append(original_image[i + box_start_row, box_start_col + box_width - 1, 0])
-        boundary_color.append(original_image[i + box_start_row, box_start_col + box_width - 1, 1])
-        boundary_color.append(original_image[i + box_start_row, box_start_col + box_width - 1, 2])
+        boundary_color.append(image[i + box_start_row, box_start_col + box_width - 1, 0])
+        boundary_color.append(image[i + box_start_row, box_start_col + box_width - 1, 1])
+        boundary_color.append(image[i + box_start_row, box_start_col + box_width - 1, 2])
         box = numpy.zeros((box_height, box_width))
         box[i, box_width - 1] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
-            if calc_rgb_distance(original_image[pixel[0] + box_start_row, pixel[1] + box_start_col],
+            if calc_rgb_distance(image[pixel[0] + box_start_row, pixel[1] + box_start_col],
                                  boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
                 # left
@@ -144,14 +144,14 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
     for j in range(box_width):
         pixels_to_check = [(box_height - 1, j)]
         boundary_color = []
-        boundary_color.append(original_image[box_start_row + box_height - 1, box_start_col + j, 0])
-        boundary_color.append(original_image[box_start_row + box_height - 1, box_start_col + j, 1])
-        boundary_color.append(original_image[box_start_row + box_height - 1, box_start_col + j, 2])
+        boundary_color.append(image[box_start_row + box_height - 1, box_start_col + j, 0])
+        boundary_color.append(image[box_start_row + box_height - 1, box_start_col + j, 1])
+        boundary_color.append(image[box_start_row + box_height - 1, box_start_col + j, 2])
         box = numpy.zeros((box_height, box_width))
         box[box_height - 1, j] = 1
         while len(pixels_to_check) > 0:
             pixel = pixels_to_check.pop(0)
-            if calc_rgb_distance(original_image[pixel[0] + box_start_row, pixel[1] + box_start_col],
+            if calc_rgb_distance(image[pixel[0] + box_start_row, pixel[1] + box_start_col],
                                  boundary_color) < threshold_seedfill:
                 original_image[pixel[0] + box_start_row, pixel[1] + box_start_col] = color
                 # left
@@ -184,7 +184,7 @@ def binarize_bitmap(original_image, box_start_row, box_start_col, box_width, box
     grayscale = skimage.color.rgb2gray(original_image)
     text_box_bitmap = numpy.zeros((box_height, box_width))
 
-    binarization_threshold = 0.5
+    binarization_threshold = 0.6
     for y in range(box_height):
         for x in range(box_width):
             if is_text_inverse:
@@ -194,7 +194,7 @@ def binarize_bitmap(original_image, box_start_row, box_start_col, box_width, box
                 else:
                     text_box_bitmap[y, x] = 0
             else:
-                if grayscale[y + box_start_row, x + box_start_col] > binarization_threshold:
+                if grayscale[y + box_start_row, x + box_start_col] < binarization_threshold:
                     text_box_bitmap[y, x] = 0
                 else:
                     text_box_bitmap[y, x] = 1

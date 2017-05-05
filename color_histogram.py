@@ -82,10 +82,14 @@ def color_histogram(original_image_path, list):
     # print("HistrA", histrA, len(histrA))
     # print("HistrB", histrB, len(histrB))
     diff_array = []
-    for a in histrA:
-        for b in histrB:
-            diff = abs(a - b)
-            diff_array.append(diff)
+    for i in range(len(histrA)):
+        diff = histrA[i] - histrB[i]
+        diff_array.append(diff)
+    # for a, b in histrA, histrB:
+    #     diff = abs(a - b)
+    #     diff_array.append(diff)
+
+    print(diff_array)
 
     # Maxxy is how many pixels have that intensity
     act_min = min(diff_array)
