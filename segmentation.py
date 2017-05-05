@@ -84,6 +84,7 @@ def set_up(text_box, saliency_map):
     for box in boxes:
         horizontal(horiz_seg_thresh, horizontal_proj, box)
 
+
 def vertical(vert_threshold, vert_proj, box):
     """ loop through all rows of profile to set boundaries """
     boxes = []
@@ -111,6 +112,7 @@ def vertical(vert_threshold, vert_proj, box):
             boxes.append([box[0] + upper_bound, box[1], box[2], len(vert_proj) - upper_bound])
     return boxes
 
+
 def horizontal(horiz_threshold, horizontal_proj, box):
     """ loop through all columns of profile to set boundaries """
     left_bound = None
@@ -137,6 +139,7 @@ def horizontal(horiz_threshold, horizontal_proj, box):
     elif left_bound is not None and right_bound is not None:
         # new_box = [box[0], box[1], left_bound, right_bound]
         FINAL_BOXES.append([box[0], box[1], box[2], box[3]])
+
 
 def run_segmentation(initial_boxes, saliency_map):
     for box in initial_boxes:

@@ -197,13 +197,14 @@ if __name__ == "__main__":
     boxes = run_segmentation(results[0], edge_image)
     print(boxes)
 
+
     # Process each text box
     for box in boxes:
         img = numpy.zeros((box[3], box[2], 3))
         for i in range(box[3]):
             for j in range(box[2]):
                 img[i, j] = A[i + box[0], j + box[1]]
-
+        print("Sadiyah, pay attention and save one of these. Love, Your Past Self")
         pylab.imshow(img, cmap="gray")
         pylab.show()
 
