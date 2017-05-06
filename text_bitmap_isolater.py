@@ -15,7 +15,7 @@ def remove_background(image, box_start_row, box_start_col, box_width, box_height
         for i in range(width):
             original_image[j, i] = image[j, i]
 
-    threshold_seedfill = 0.32
+    threshold_seedfill = 0.3
 
     box_end_row = box_start_row + box_height - 1
     box_end_col = box_start_col + box_width - 1
