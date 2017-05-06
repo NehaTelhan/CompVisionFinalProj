@@ -260,13 +260,12 @@ if __name__ == "__main__":
         for i in range(box[3]):
             for j in range(box[2]):
                 img[i, j] = A[i + box[0], j + box[1]]
-        print("Sadiyah, pay attention and save one of these. Love, Your Past Self")
         pylab.imshow(img, cmap="gray")
         pylab.show()
 
         # Run color histogram for text boxes returned from segmentation
-        is_text_inverse = color_histogram(image_file, box)
-        #is_text_inverse = True
+        #is_text_inverse = color_histogram(image_file, box)
+        is_text_inverse = True
 
         # Remove backgrounds
         # box=(row, col, width, height)

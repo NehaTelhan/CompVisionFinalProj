@@ -41,7 +41,7 @@ def color_histogram(original_image_path, list):
     '''Finds the center of the textbox
     and adds the two rows above and below the middle line to array
     from the left of the textbox to the right'''
-    for i in range((y_pix+box_height//2)-2, (y_pix+box_height//2)+2):
+    for i in range((y_pix+box_height/2)-2, (y_pix+box_height/2)+2):
         center_four_rows.append(original_image[i][x_pix:x_pix+box_width])
 
     #Make the color histogram for the text box's center rows and show the colors (RGB) as lines
