@@ -18,7 +18,7 @@ def load_cnn_model(modelFileName):
     return model
 
 def confusion_matrix(training_images, training_classifications):
-    model = load_model("modelcnn7.h5")
+    model = load_model("modelcnn.h5")
     model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
                   metrics=['accuracy'])
@@ -100,7 +100,7 @@ def neural_network_predict_filename(filename):
     image_input = numpy.zeros((1, 48, 48, 3))
     image_input[0] = A
 
-    base_model = load_model("modelcnn7.h5")
+    base_model = load_model("modelcnn.h5")
 
     base_model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=0.1),
