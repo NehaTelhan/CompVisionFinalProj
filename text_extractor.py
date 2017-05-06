@@ -207,11 +207,11 @@ if __name__ == "__main__":
 
     start_time = timeit.default_timer()
     # Read in original image
-    image_file = "demo-image1.jpg"
-    # image_file = "training_set/22.jpg"
+    # image_file = "demo-image1.jpg"
+    image_file = "training_set/14.jpg"
 
     A = skimage.io.imread(image_file)
-    A = skimage.transform.rescale(A, 0.25) # FOR demo-image1 ONLY
+    # A = skimage.transform.rescale(A, 0.25) # FOR demo-image1 ONLY
 
     edge_image = canny_edges(A)
     results = saliency_map(A)
