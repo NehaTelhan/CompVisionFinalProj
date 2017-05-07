@@ -229,7 +229,9 @@ if __name__ == "__main__":
         pylab.show()
 
         # Run color histogram for text boxes returned from segmentation
+
         is_text_inverse = color_histogram(image_file, box)
+        is_text_inverse = True
 
         # Remove backgrounds
         # box=(row, col, width, height)
