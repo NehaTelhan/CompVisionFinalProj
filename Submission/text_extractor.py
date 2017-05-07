@@ -44,7 +44,7 @@ def saliency_map(A):
     saliency_map = numpy.zeros((A.shape[0], A.shape[1]))
 
     # Load model
-    model = load_cnn_model("modelcnn7.h5")
+    model = load_cnn_model("modelcnn.h5")
 
     image_height = A.shape[0]
     image_width = A.shape[1]
@@ -203,11 +203,11 @@ if __name__ == "__main__":
 
     # Read in original image
     # image_file = "demo-image1.jpg"
-    image_file = "../demo-image1.jpg"
+    image_file = "input_images/12.jpg"
 
     A = skimage.io.imread(image_file)
 
-    A = skimage.transform.rescale(A, 0.25) # FOR demo-image1 ONLY
+    # A = skimage.transform.rescale(A, 0.25) # FOR demo-image1 ONLY
 
     edge_image = canny_edges(A)
     #pylab.imshow(edge_image)

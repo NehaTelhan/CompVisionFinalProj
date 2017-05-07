@@ -43,7 +43,7 @@ def set_up(text_box, saliency_map):
     min_vert = min(vert_proj)
     print("Proj:", vert_proj)
 
-    vert_seg_thresh = 20
+    vert_seg_thresh = min_vert
     new_box = [starting_pixel[0], starting_pixel[1], width, height]
     boxes = vertical(vert_seg_thresh, vert_proj, new_box)
     print("boxes", boxes)
